@@ -202,7 +202,7 @@ if(WIN32)
 
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(ARCH_NAME "64bit")
-		set(OBS_BUILDDIR_ARCH "build64")
+		set(OBS_BUILDDIR_ARCH "build")
 	else()
 		set(ARCH_NAME "32bit")
 		set(OBS_BUILDDIR_ARCH "build32")

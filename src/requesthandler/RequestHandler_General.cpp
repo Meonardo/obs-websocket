@@ -18,6 +18,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include <QImageWriter>
+#include <util/config-file.h>
 
 #include "RequestHandler.h"
 #include "../websocketserver/WebSocketServer.h"
@@ -373,4 +374,56 @@ RequestResult RequestHandler::Sleep(const Request& request)
 	} else {
 		return RequestResult::Error(RequestStatus::UnsupportedRequestBatchExecutionType);
 	}
+}
+
+/**
+ * Set the filename formatting string
+ *
+ * @param {String} `filename-formatting` Filename formatting string to set.
+ *
+ * @api requests
+ * @name SetFilenameFormatting
+ * @category general
+ * @since 4.3.0
+ */
+RequestResult RequestHandler::SetFilenameFormatting(const Request& request) {
+	RequestStatus::RequestStatus statusCode = RequestStatus::Unknown;
+	std::string comment;
+
+	if (!request.Contains("filename-formatting")) {
+		comment = "<filename-formatting> parameter missing";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	std::string filenameFormatting = request.RequestData["filename-formatting"];
+	if (!filenameFormatting.length()) {
+		comment = "invalid request parameters";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	config_t* profile = obs_frontend_get_profile_config();
+	config_set_string(profile, "Output", "FilenameFormatting", filenameFormatting.c_str());
+	config_save(profile);
+
+	return RequestResult::Success();
+}
+
+/**
+ * Get the filename formatting string
+ *
+ * @return {String} `filename-formatting` Current filename formatting string.
+ *
+ * @api requests
+ * @name GetFilenameFormatting
+ * @category general
+ * @since 4.3.0
+ */
+RequestResult RequestHandler::GetFilenameFormatting(const Request& request) {
+	config_t* profile = obs_frontend_get_profile_config();
+	const char* result = config_get_string(profile, "Output", "FilenameFormatting");
+
+	json responseData;
+	responseData["filename-formatting"] = result;
+
+	return RequestResult::Success(responseData);
 }

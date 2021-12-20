@@ -403,3 +403,190 @@ RequestResult RequestHandler::SetSceneItemIndex(const Request& request)
 
 	return RequestResult::Success();
 }
+
+RequestResult RequestHandler::SetSceneItemProperties(const Request& request) {
+
+	RequestStatus::RequestStatus statusCode = RequestStatus::InvalidRequestField;
+	std::string comment;
+	if (!request.Contains("item")) {
+		comment = "missing request parameters";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	OBSData params = Utils::Json::JsonToObsData(request.RequestData);
+
+	OBSSceneItemAutoRelease sceneItem = request.ValidateSceneItem("sceneName", "sceneItemId", statusCode, comment, OBS_WEBSOCKET_SCENE_FILTER_SCENE_OR_GROUP);
+	if (!sceneItem)
+		return RequestResult::Error(statusCode, comment);
+
+	bool badRequest = false;
+	OBSDataAutoRelease errorData = obs_data_create();
+
+	obs_sceneitem_defer_update_begin(sceneItem);
+
+	if (request.Contains("position")) {
+		vec2 oldPosition;
+		OBSDataAutoRelease positionError = obs_data_create();
+		obs_sceneitem_get_pos(sceneItem, &oldPosition);
+
+		OBSDataAutoRelease reqPosition = obs_data_get_obj(params, "position");
+		vec2 newPosition = oldPosition;
+
+		if (obs_data_has_user_value(reqPosition, "x")) {
+			newPosition.x = obs_data_get_double(reqPosition, "x");
+		}
+		if (obs_data_has_user_value(reqPosition, "y")) {
+			newPosition.y = obs_data_get_double(reqPosition, "y");
+		}
+
+		if (obs_data_has_user_value(reqPosition, "alignment")) {
+			const uint32_t alignment = obs_data_get_int(reqPosition, "alignment");
+			obs_sceneitem_set_alignment(sceneItem, alignment);
+		}
+
+		obs_sceneitem_set_pos(sceneItem, &newPosition);
+	}
+
+	if (request.Contains("rotation")) {
+		obs_sceneitem_set_rot(sceneItem, (float)obs_data_get_double(params, "rotation"));
+	}
+
+	if (request.Contains("scale")) {
+		OBSDataAutoRelease reqScale = obs_data_get_obj(params, "scale");
+
+		if (obs_data_has_user_value(reqScale, "filter")) {
+			std::string newScaleFilter = obs_data_get_string(reqScale, "filter");
+			if (newScaleFilter == "OBS_SCALE_DISABLE") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_DISABLE);
+			}
+			else if (newScaleFilter == "OBS_SCALE_POINT") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_POINT);
+			}
+			else if (newScaleFilter == "OBS_SCALE_BICUBIC") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_BICUBIC);
+			}
+			else if (newScaleFilter == "OBS_SCALE_BILINEAR") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_BICUBIC);
+			}
+			else if (newScaleFilter == "OBS_SCALE_LANCZOS") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_LANCZOS);
+			}
+			else if (newScaleFilter == "OBS_SCALE_AREA") {
+				obs_sceneitem_set_scale_filter(sceneItem, OBS_SCALE_AREA);
+			}
+		}
+
+		vec2 oldScale;
+		obs_sceneitem_get_scale(sceneItem, &oldScale);
+		vec2 newScale = oldScale;
+
+		if (obs_data_has_user_value(reqScale, "x")) {
+			newScale.x = obs_data_get_double(reqScale, "x");
+		}
+		if (obs_data_has_user_value(reqScale, "y")) {
+			newScale.y = obs_data_get_double(reqScale, "y");
+		}
+
+		obs_sceneitem_set_scale(sceneItem, &newScale);
+	}
+
+	if (request.Contains("crop")) {
+		obs_sceneitem_crop oldCrop;
+		obs_sceneitem_get_crop(sceneItem, &oldCrop);
+
+		OBSDataAutoRelease reqCrop = obs_data_get_obj(params, "crop");
+		obs_sceneitem_crop newCrop = oldCrop;
+
+		if (obs_data_has_user_value(reqCrop, "top")) {
+			newCrop.top = obs_data_get_int(reqCrop, "top");
+		}
+		if (obs_data_has_user_value(reqCrop, "right")) {
+			newCrop.right = obs_data_get_int(reqCrop, "right");
+		}
+		if (obs_data_has_user_value(reqCrop, "bottom")) {
+			newCrop.bottom = obs_data_get_int(reqCrop, "bottom");
+		}
+		if (obs_data_has_user_value(reqCrop, "left")) {
+			newCrop.left = obs_data_get_int(reqCrop, "left");
+		}
+
+		obs_sceneitem_set_crop(sceneItem, &newCrop);
+	}
+
+	if (request.Contains("visible")) {
+		obs_sceneitem_set_visible(sceneItem, obs_data_get_bool(params, "visible"));
+	}
+
+	if (request.Contains("locked")) {
+		obs_sceneitem_set_locked(sceneItem, obs_data_get_bool(params, "locked"));
+	}
+
+	if (request.Contains("bounds")) {
+		bool badBounds = false;
+		OBSDataAutoRelease boundsError = obs_data_create();
+		OBSDataAutoRelease reqBounds = obs_data_get_obj(params, "bounds");
+
+		if (obs_data_has_user_value(reqBounds, "type")) {
+			std::string newBoundsType = obs_data_get_string(reqBounds, "type");
+			if (newBoundsType == "OBS_BOUNDS_NONE") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_NONE);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_STRETCH") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_STRETCH);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_SCALE_INNER") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_SCALE_INNER);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_SCALE_OUTER") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_SCALE_OUTER);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_SCALE_TO_WIDTH") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_SCALE_TO_WIDTH);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_SCALE_TO_HEIGHT") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_SCALE_TO_HEIGHT);
+			}
+			else if (newBoundsType == "OBS_BOUNDS_MAX_ONLY") {
+				obs_sceneitem_set_bounds_type(sceneItem, OBS_BOUNDS_MAX_ONLY);
+			}
+			else {
+				badRequest = badBounds = true;
+				obs_data_set_string(boundsError, "type", "invalid");
+			}
+		}
+
+		vec2 oldBounds;
+		obs_sceneitem_get_bounds(sceneItem, &oldBounds);
+		vec2 newBounds = oldBounds;
+
+		if (obs_data_has_user_value(reqBounds, "x")) {
+			newBounds.x = obs_data_get_double(reqBounds, "x");
+		}
+		if (obs_data_has_user_value(reqBounds, "y")) {
+			newBounds.y = obs_data_get_double(reqBounds, "y");
+		}
+
+		obs_sceneitem_set_bounds(sceneItem, &newBounds);
+
+		if (obs_data_has_user_value(reqBounds, "alignment")) {
+			const uint32_t bounds_alignment = obs_data_get_int(reqBounds, "alignment");
+			obs_sceneitem_set_bounds_alignment(sceneItem, bounds_alignment);
+		}
+
+		if (badBounds) {
+			obs_data_set_obj(errorData, "bounds", boundsError);
+		}
+	}
+
+	obs_sceneitem_defer_update_end(sceneItem);
+
+	if (badRequest) {
+		comment = "missing request parameters";
+		return RequestResult::Error(statusCode, "Bad Request");
+	}
+
+	json responseData;
+	responseData["sceneItemId"] = obs_sceneitem_get_id(sceneItem);
+
+	return RequestResult::Success(responseData);
+}

@@ -32,6 +32,8 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"GetStudioModeEnabled", &RequestHandler::GetStudioModeEnabled},
 	{"SetStudioModeEnabled", &RequestHandler::SetStudioModeEnabled},
 	{"Sleep", &RequestHandler::Sleep},
+	{"SetFilenameFormatting", &RequestHandler::SetFilenameFormatting},
+	{"GetFilenameFormatting", &RequestHandler::GetFilenameFormatting},
 
 	// Config
 	{"GetPersistentData", &RequestHandler::GetPersistentData},
@@ -54,6 +56,8 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"GetSourceActive", &RequestHandler::GetSourceActive},
 	{"GetSourceScreenshot", &RequestHandler::GetSourceScreenshot},
 	{"SaveSourceScreenshot", &RequestHandler::SaveSourceScreenshot},
+	{"CreateSource", &RequestHandler::CreateSource},
+	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
 
 	// Scenes
 	{"GetSceneList", &RequestHandler::GetSceneList},
@@ -69,7 +73,7 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"GetInputList", &RequestHandler::GetInputList},
 	{"GetInputKindList", &RequestHandler::GetInputKindList},
 	{"CreateInput", &RequestHandler::CreateInput},
-	//{"RemoveInput", &RequestHandler::RemoveInput}, // Disabled for now. Pending obs-studio#5276
+	{"RemoveInput", &RequestHandler::RemoveInput},
 	{"SetInputName", &RequestHandler::SetInputName},
 	{"GetInputDefaultSettings", &RequestHandler::GetInputDefaultSettings},
 	{"GetInputSettings", &RequestHandler::GetInputSettings},
@@ -101,6 +105,7 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"SetSceneItemLocked", &RequestHandler::SetSceneItemLocked},
 	{"GetSceneItemIndex", &RequestHandler::GetSceneItemIndex},
 	{"SetSceneItemIndex", &RequestHandler::SetSceneItemIndex},
+	{"SetSceneItemProperties", &RequestHandler::SetSceneItemProperties},
 
 	// Stream
 	{"GetStreamStatus", &RequestHandler::GetStreamStatus},
@@ -116,7 +121,8 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"ToggleRecordPause", &RequestHandler::ToggleRecordPause},
 	{"PauseRecord", &RequestHandler::PauseRecord},
 	{"ResumeRecord", &RequestHandler::ResumeRecord},
-	//{"GetRecordDirectory", &RequestHandler::GetRecordDirectory},
+	{"GetRecordDirectory", &RequestHandler::GetRecordDirectory},
+	{"SetRecordDirectory", &RequestHandler::SetRecordDirectory},
 
 	// Media Inputs
 	{"GetMediaInputStatus", &RequestHandler::GetMediaInputStatus},

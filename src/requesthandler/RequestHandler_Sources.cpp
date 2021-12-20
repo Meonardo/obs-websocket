@@ -312,3 +312,168 @@ RequestResult RequestHandler::SaveSourceScreenshot(const Request& request)
 
 	return RequestResult::Success();
 }
+
+/**
+ * Create a source and add it as a sceneitem to a scene.
+ *
+ * @param {String} `sourceName` Source name.
+ * @param {String} `sourceKind` Source kind, Eg. `vlc_source`.
+ * @param {String} `sceneName` Scene to add the new source to.
+ * @param {Object (optional)} `sourceSettings` Source settings data.
+ * @param {boolean (optional)} `setVisible` Set the created SceneItem as visible or not. Defaults to true
+ *
+ * @return {int} `itemId` ID of the SceneItem in the scene.
+ *
+ * @api requests
+ * @name CreateSource
+ * @category sources
+ * @since 4.9.0
+ */
+RequestResult RequestHandler::CreateSource(const Request& request)
+{
+	std::string comment;
+	RequestStatus::RequestStatus statusCode = RequestStatus::InvalidRequestField;
+	if (!request.Contains("sourceName") || !request.Contains("sourceKind") || !request.Contains("sceneName")) {
+		comment = "missing request parameters";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	std::string sourceName = request.RequestData["sourceName"];
+	std::string sourceKind = request.RequestData["sourceKind"];
+
+	if (sourceName.length() == 0 || sourceKind.length() == 0) {
+		comment = "empty sourceKind or sourceName parameters";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	OBSSourceAutoRelease source = obs_get_source_by_name(sourceName.c_str());
+	if (source) {
+		comment = "a source with that name already exists";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	std::string sceneName = request.RequestData["sceneName"];
+	if (sceneName.length() == 0) {
+		comment = "empty sceneName parameters";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	OBSSourceAutoRelease sceneSource = obs_get_source_by_name(sceneName.c_str());
+	OBSScene scene = obs_scene_from_source(sceneSource);
+	if (!scene) {
+		comment = "requested scene is invalid or doesnt exist";
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	OBSDataAutoRelease sourceSettings = nullptr;
+	if (request.Contains("sourceSettings") && request.ValidateOptionalObject("sourceSettings", statusCode, comment)) {
+		sourceSettings = Utils::Json::JsonToObsData(request.RequestData["sourceSettings"]);
+	}
+
+	OBSSourceAutoRelease newSource = obs_source_create(sourceKind.c_str(), sourceName.c_str(), sourceSettings, nullptr);
+
+	if (!newSource) {
+		comment = "failed to create the source";
+		return RequestResult::Error(statusCode, comment);
+	}
+	obs_source_set_enabled(newSource, true);
+
+	Utils::AddSourceData data;
+	data.source = newSource;
+	data.setVisible = true;
+	if (request.Contains("setVisible")) {
+		bool isVisible = request.RequestData["setVisible"];
+		data.setVisible = isVisible;
+	}
+
+	obs_enter_graphics();
+	obs_scene_atomic_update(scene, Utils::AddSourceHelper, &data);
+	obs_leave_graphics();
+
+	json responseData;
+	responseData["sceneItemId"] = obs_sceneitem_get_id(data.sceneItem);
+
+	return RequestResult::Success(responseData);
+}
+
+/**
+* Get a list of all available sources types
+*
+* @return {Array<Object>} `types` Array of source types
+* @return {String} `types.*.typeId` Non-unique internal source type ID
+* @return {String} `types.*.displayName` Display name of the source type
+* @return {String} `types.*.type` Type. Value is one of the following: "input", "filter", "transition" or "other"
+* @return {Object} `types.*.defaultSettings` Default settings of this source type
+* @return {Object} `types.*.caps` Source type capabilities
+* @return {Boolean} `types.*.caps.isAsync` True if source of this type provide frames asynchronously
+* @return {Boolean} `types.*.caps.hasVideo` True if sources of this type provide video
+* @return {Boolean} `types.*.caps.hasAudio` True if sources of this type provide audio
+* @return {Boolean} `types.*.caps.canInteract` True if interaction with this sources of this type is possible
+* @return {Boolean} `types.*.caps.isComposite` True if sources of this type composite one or more sub-sources
+* @return {Boolean} `types.*.caps.doNotDuplicate` True if sources of this type should not be fully duplicated
+* @return {Boolean} `types.*.caps.doNotSelfMonitor` True if sources of this type may cause a feedback loop if it's audio is monitored and shouldn't be
+*
+* @api requests
+* @name GetSourceTypesList
+* @category sources
+* @since 4.3.0
+*/
+RequestResult RequestHandler::GetSourceTypesList(const Request& request)
+{
+	OBSDataArrayAutoRelease idsArray = obs_data_array_create();
+
+	const char* id;
+	size_t idx = 0;
+
+	QHash<QString, QString> idTypes;
+
+	idx = 0;
+	while (obs_enum_input_types(idx++, &id)) {
+		idTypes.insert(id, "input");
+	}
+
+	idx = 0;
+	while (obs_enum_filter_types(idx++, &id)) {
+		idTypes.insert(id, "filter");
+	}
+
+	idx = 0;
+	while (obs_enum_transition_types(idx++, &id)) {
+		idTypes.insert(id, "transition");
+	}
+
+	idx = 0;
+	while (obs_enum_source_types(idx++, &id)) {
+		OBSDataAutoRelease item = obs_data_create();
+
+		obs_data_set_string(item, "typeId", id);
+		obs_data_set_string(item, "displayName", obs_source_get_display_name(id));
+		obs_data_set_string(item, "type", idTypes.value(id, "other").toUtf8());
+
+		uint32_t caps = obs_get_source_output_flags(id);
+		OBSDataAutoRelease capsData = obs_data_create();
+		obs_data_set_bool(capsData, "isAsync", caps & OBS_SOURCE_ASYNC);
+		obs_data_set_bool(capsData, "hasVideo", caps & OBS_SOURCE_VIDEO);
+		obs_data_set_bool(capsData, "hasAudio", caps & OBS_SOURCE_AUDIO);
+		obs_data_set_bool(capsData, "canInteract", caps & OBS_SOURCE_INTERACTION);
+		obs_data_set_bool(capsData, "isComposite", caps & OBS_SOURCE_COMPOSITE);
+		obs_data_set_bool(capsData, "doNotDuplicate", caps & OBS_SOURCE_DO_NOT_DUPLICATE);
+		obs_data_set_bool(capsData, "doNotSelfMonitor", caps & OBS_SOURCE_DO_NOT_SELF_MONITOR);
+		obs_data_set_bool(capsData, "isDeprecated", caps & OBS_SOURCE_DEPRECATED);
+
+		obs_data_set_obj(item, "caps", capsData);
+
+		OBSDataAutoRelease defaultSettings = obs_get_source_defaults(id);
+		obs_data_set_obj(item, "defaultSettings", defaultSettings);
+
+		obs_data_array_push_back(idsArray, item);
+	}
+
+	OBSDataAutoRelease response = obs_data_create();
+	obs_data_set_array(response, "types", idsArray);
+
+	json responseData;
+	responseData = Utils::Json::ObsDataToJson(response);
+
+	return RequestResult::Success(responseData);
+}

@@ -86,6 +86,7 @@ enum ObsMediaInputAction {
 
 namespace Utils {
 	namespace Obs {
+		bool SetCurrentRecordingFolder(const char*);
 		namespace StringHelper {
 			std::string GetObsVersion();
 			std::string GetCurrentSceneCollection();
@@ -137,4 +138,11 @@ namespace Utils {
 			obs_sceneitem_t *CreateInput(std::string inputName, std::string inputKind, obs_data_t *inputSettings, obs_scene_t *scene, bool sceneItemEnabled = true); // Increments ref. Use OBSSceneItemAutoRelease
 		}
 	}
+
+	struct AddSourceData {
+		obs_source_t* source;
+		obs_sceneitem_t* sceneItem;
+		bool setVisible;
+	};
+	void AddSourceHelper(void* _data, obs_scene_t* scene);
 }

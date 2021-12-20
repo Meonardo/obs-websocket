@@ -41,11 +41,11 @@ Config::Config() :
 	PasswordOverridden(false),
 	FirstLoad(true),
 	ServerEnabled(true),
-	ServerPort(4444),
+	ServerPort(9991),
 	DebugEnabled(false),
 	AlertsEnabled(false),
 	AuthRequired(true),
-	ServerPassword("")
+	ServerPassword("AmdoxRecorder")
 {
 	SetDefaultsToGlobalStore();
 }
@@ -72,7 +72,7 @@ void Config::Load()
 		FirstLoad = false;
 		if (!ServerPassword.isEmpty()) {
 			blog(LOG_INFO, "[Config::Load] (FirstLoad) Generating new server password.");
-			ServerPassword = QString::fromStdString(Utils::Crypto::GeneratePassword());
+			ServerPassword = QString::fromStdString("AmdoxRecorder");
 		} else {
 			blog(LOG_INFO, "[Config::Load] (FirstLoad) Not generating new password since one is already configured.");
 		}

@@ -55,6 +55,9 @@ class RequestHandler {
 		RequestResult SetStudioModeEnabled(const Request&);
 		RequestResult Sleep(const Request&);
 
+		RequestResult SetFilenameFormatting(const Request&);
+		RequestResult GetFilenameFormatting(const Request&);
+
 		// Config
 		RequestResult GetPersistentData(const Request&);
 		RequestResult SetPersistentData(const Request&);
@@ -76,6 +79,9 @@ class RequestHandler {
 		RequestResult GetSourceActive(const Request&);
 		RequestResult GetSourceScreenshot(const Request&);
 		RequestResult SaveSourceScreenshot(const Request&);
+
+		RequestResult CreateSource(const Request& request);
+		RequestResult GetSourceTypesList(const Request& request);
 
 		// Scenes
 		RequestResult GetSceneList(const Request&);
@@ -123,6 +129,7 @@ class RequestHandler {
 		RequestResult SetSceneItemLocked(const Request&);
 		RequestResult GetSceneItemIndex(const Request&);
 		RequestResult SetSceneItemIndex(const Request&);
+		RequestResult SetSceneItemProperties(const Request&);
 
 		// Stream
 		RequestResult GetStreamStatus(const Request&);
@@ -139,6 +146,7 @@ class RequestHandler {
 		RequestResult PauseRecord(const Request&);
 		RequestResult ResumeRecord(const Request&);
 		RequestResult GetRecordDirectory(const Request&);
+		RequestResult SetRecordDirectory(const Request&);
 
 		// Media Inputs
 		RequestResult GetMediaInputStatus(const Request&);

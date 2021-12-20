@@ -23,6 +23,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <obs-frontend-api.h>
 #include <util/config-file.h>
 #include <util/util_uint64.h>
+#include <QtCore/QDir>
 
 #include "Obs.h"
 #include "../obs-websocket.h"
@@ -89,12 +90,24 @@ std::string Utils::Obs::StringHelper::GetCurrentProfilePath()
 
 std::string Utils::Obs::StringHelper::GetCurrentRecordOutputPath()
 {
-	//char *recordOutputPath = obs_frontend_get_current_record_output_path();
-	//std::string ret = recordOutputPath;
-	//bfree(recordOutputPath);
-	//return ret;
+	char* recordOutputPath = obs_frontend_get_current_record_output_path();
+	std::string ret = recordOutputPath;
+	bfree(recordOutputPath);
+	return ret;
+}
 
-	return "";
+bool Utils::Obs::SetCurrentRecordingFolder(const char* path) {
+	QDir dir(path);
+	if (!dir.exists()) {
+		dir.mkpath(".");
+	}
+
+	config_t* profile = obs_frontend_get_profile_config();
+	config_set_string(profile, "AdvOut", "RecFilePath", path);
+	config_set_string(profile, "SimpleOutput", "FilePath", path);
+
+	config_save(profile);
+	return true;
 }
 
 std::string Utils::Obs::StringHelper::GetSourceType(obs_source_t *source)
@@ -575,4 +588,11 @@ obs_sceneitem_t *Utils::Obs::ActionHelper::CreateInput(std::string inputName, st
 		obs_source_remove(input);
 
 	return ret;
+}
+
+void Utils::AddSourceHelper(void* _data, obs_scene_t* scene)
+{
+	auto* data = reinterpret_cast<AddSourceData*>(_data);
+	data->sceneItem = obs_scene_add(scene, data->source);
+	obs_sceneitem_set_visible(data->sceneItem, data->setVisible);
 }
