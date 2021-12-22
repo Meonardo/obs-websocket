@@ -13,3 +13,7 @@
 /installer/installer-windows.generated.iss
 /out/build/x64-Debug
 /.vs
+deps/asio
+deps/json
+deps/qr
+deps/websocketpp
