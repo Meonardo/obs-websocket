@@ -18,6 +18,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include <util/config-file.h>
+#include <QtCore/QDir>
 
 #include "Obs.h"
 #include "../obs-websocket.h"
@@ -84,4 +85,25 @@ json Utils::Obs::ObjectHelper::GetSceneItemTransform(obs_sceneitem_t *item)
 	ret["cropBottom"] = int(crop.bottom);
 
 	return ret;
+}
+
+bool Utils::Obs::SetCurrentRecordingFolder(const char* path) {
+	QDir dir(path);
+	if (!dir.exists()) {
+		dir.mkpath(".");
+	}
+
+	config_t* profile = obs_frontend_get_profile_config();
+	config_set_string(profile, "AdvOut", "RecFilePath", path);
+	config_set_string(profile, "SimpleOutput", "FilePath", path);
+
+	config_save(profile);
+	return true;
+}
+
+void Utils::AddSourceHelper(void* _data, obs_scene_t* scene)
+{
+	auto* data = reinterpret_cast<AddSourceData*>(_data);
+	data->sceneItem = obs_scene_add(scene, data->source);
+	obs_sceneitem_set_visible(data->sceneItem, data->setVisible);
 }
