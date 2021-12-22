@@ -22,9 +22,9 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 /**
  * Gets an array of all scenes in OBS.
  *
- * @responseField scenes                  | Array<Object> | Array of scenes in OBS
  * @responseField currentProgramSceneName | String        | Current program scene
  * @responseField currentPreviewSceneName | String        | Current preview scene. `null` if not in studio mode
+ * @responseField scenes                  | Array<Object> | Array of scenes in OBS
  *
  * @requestType GetSceneList
  * @complexity 2
@@ -49,7 +49,7 @@ RequestResult RequestHandler::GetSceneList(const Request&)
 	else
 		responseData["currentPreviewSceneName"] = nullptr;
 
-	responseData["scenes"] = Utils::Obs::ListHelper::GetSceneList();
+	responseData["scenes"] = Utils::Obs::ArrayHelper::GetSceneList();
 
 	return RequestResult::Success(responseData);
 }

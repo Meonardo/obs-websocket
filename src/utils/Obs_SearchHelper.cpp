@@ -1,6 +1,5 @@
 /*
 obs-websocket
-Copyright (C) 2016-2021 Stephane Lepin <stephane.lepin@gmail.com>
 Copyright (C) 2020-2021 Kyle Manning <tt2468@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
@@ -17,11 +16,33 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-#pragma once
-
-#include "Crypto.h"
-#include "Json.h"
 #include "Obs.h"
-#include "Obs_VolumeMeter.h"
-#include "Platform.h"
-#include "Compat.h"
+#include "../plugin-macros.generated.h"
+
+obs_hotkey_t *Utils::Obs::SearchHelper::GetHotkeyByName(std::string name)
+{
+	if (name.empty())
+		return nullptr;
+
+	auto hotkeys = ArrayHelper::GetHotkeyList();
+
+	for (auto hotkey : hotkeys) {
+		if (obs_hotkey_get_name(hotkey) == name)
+			return hotkey;
+	}
+
+	return nullptr;
+}
+
+// Increments item ref. Use OBSSceneItemAutoRelease
+obs_sceneitem_t *Utils::Obs::SearchHelper::GetSceneItemByName(obs_scene_t *scene, std::string name)
+{
+	if (name.empty())
+		return nullptr;
+
+	// Finds first matching scene item in scene, search starts at index 0
+	OBSSceneItem ret = obs_scene_find_source(scene, name.c_str());
+	obs_sceneitem_addref(ret);
+
+	return ret;
+}

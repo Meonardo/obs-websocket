@@ -85,7 +85,7 @@ RequestResult RequestHandler::GetVersion(const Request&)
  */
 RequestResult RequestHandler::GetStats(const Request&)
 {
-	json responseData = Utils::Obs::DataHelper::GetStats();
+	json responseData = Utils::Obs::ObjectHelper::GetStats();
 
 	responseData["webSocketSessionIncomingMessages"] = _session->IncomingMessages();
 	responseData["webSocketSessionOutgoingMessages"] = _session->OutgoingMessages();
@@ -196,7 +196,7 @@ RequestResult RequestHandler::CallVendorRequest(const Request& request)
 RequestResult RequestHandler::GetHotkeyList(const Request&)
 {
 	json responseData;
-	responseData["hotkeys"] = Utils::Obs::ListHelper::GetHotkeyNameList();
+	responseData["hotkeys"] = Utils::Obs::ArrayHelper::GetHotkeyNameList();
 	return RequestResult::Success(responseData);
 }
 
