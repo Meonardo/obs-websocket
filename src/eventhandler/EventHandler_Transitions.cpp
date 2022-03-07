@@ -18,3 +18,130 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include "EventHandler.h"
+
+/**
+ * The current scene transition has changed.
+ *
+ * @dataField transitionName | String | Name of the new transition
+ *
+ * @eventType CurrentSceneTransitionChanged
+ * @eventSubscription Transitions
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category transitions
+ */
+void EventHandler::HandleCurrentSceneTransitionChanged()
+{
+	OBSSourceAutoRelease transition = obs_frontend_get_current_transition();
+
+	json eventData;
+	eventData["transitionName"] = obs_source_get_name(transition);
+	BroadcastEvent(EventSubscription::Transitions, "CurrentSceneTransitionChanged", eventData);
+}
+
+/**
+ * The current scene transition duration has changed.
+ *
+ * @dataField transitionDuration | Number | Transition duration in milliseconds
+ *
+ * @eventType CurrentSceneTransitionDurationChanged
+ * @eventSubscription Transitions
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category transitions
+ */
+void EventHandler::HandleCurrentSceneTransitionDurationChanged()
+{
+	json eventData;
+	eventData["transitionDuration"] = obs_frontend_get_transition_duration();
+	BroadcastEvent(EventSubscription::Transitions, "CurrentSceneTransitionDurationChanged", eventData);
+}
+
+/**
+ * A scene transition has started.
+ *
+ * @dataField transitionName | String | Scene transition name
+ *
+ * @eventType SceneTransitionStarted
+ * @eventSubscription Transitions
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category transitions
+ */
+void EventHandler::HandleSceneTransitionStarted(void *param, calldata_t *data)
+{
+	auto eventHandler = static_cast<EventHandler*>(param);
+
+	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
+	if (!source)
+		return;
+
+	json eventData;
+	eventData["transitionName"] = obs_source_get_name(source);
+	eventHandler->BroadcastEvent(EventSubscription::Transitions, "SceneTransitionStarted", eventData);
+}
+
+/**
+ * A scene transition has completed fully.
+ *
+ * Note: Does not appear to trigger when the transition is interrupted by the user.
+ *
+ * @dataField transitionName | String | Scene transition name
+ *
+ * @eventType SceneTransitionEnded
+ * @eventSubscription Transitions
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category transitions
+ */
+void EventHandler::HandleSceneTransitionEnded(void *param, calldata_t *data)
+{
+	auto eventHandler = static_cast<EventHandler*>(param);
+
+	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
+	if (!source)
+		return;
+
+	json eventData;
+	eventData["transitionName"] = obs_source_get_name(source);
+	eventHandler->BroadcastEvent(EventSubscription::Transitions, "SceneTransitionEnded", eventData);
+}
+
+/**
+ * A scene transition's video has completed fully.
+ *
+ * Useful for stinger transitions to tell when the video *actually* ends.
+ * `SceneTransitionEnded` only signifies the cut point, not the completion of transition playback.
+ *
+ * Note: Appears to be called by every transition, regardless of relevance.
+ *
+ * @dataField transitionName | String | Scene transition name
+ *
+ * @eventType SceneTransitionVideoEnded
+ * @eventSubscription Transitions
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category transitions
+ */
+void EventHandler::HandleSceneTransitionVideoEnded(void *param, calldata_t *data)
+{
+	auto eventHandler = static_cast<EventHandler*>(param);
+
+	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
+	if (!source)
+		return;
+
+	json eventData;
+	eventData["transitionName"] = obs_source_get_name(source);
+	eventHandler->BroadcastEvent(EventSubscription::Transitions, "SceneTransitionVideoEnded", eventData);
+}

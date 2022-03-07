@@ -62,7 +62,7 @@ using OBSWeakServiceAutoRelease = OBSRef<obs_weak_service_t *, ___weak_service_d
 template <typename T> T* GetCalldataPointer(const calldata_t *data, const char* name) {
 	void *ptr = nullptr;
 	calldata_get_ptr(data, name, &ptr);
-	return reinterpret_cast<T*>(ptr);
+	return static_cast<T*>(ptr);
 }
 
 enum ObsOutputState {
@@ -164,6 +164,7 @@ namespace Utils {
 			std::string GetMediaInputState(obs_source_t *input);
 			std::string GetLastReplayBufferFilePath();
 			std::string GetSceneItemBoundsType(enum obs_bounds_type type);
+			std::string GetSceneItemBlendMode(enum obs_blending_type mode);
 			std::string DurationToTimecode(uint64_t);
 			std::string GetOutputState(ObsOutputState state);
 		}
@@ -171,11 +172,13 @@ namespace Utils {
 		namespace EnumHelper {
 			enum obs_bounds_type GetSceneItemBoundsType(std::string boundsType);
 			enum ObsMediaInputAction GetMediaInputAction(std::string mediaAction);
+			enum obs_blending_type GetSceneItemBlendMode(std::string mode);
 		}
 
 		namespace NumberHelper {
 			uint64_t GetOutputDuration(obs_output_t *output);
 			size_t GetSceneCount();
+			size_t GetSourceFilterIndex(obs_source_t *source, obs_source_t *filter);
 		}
 
 		namespace ArrayHelper {
@@ -184,12 +187,15 @@ namespace Utils {
 			std::vector<obs_hotkey_t *> GetHotkeyList();
 			std::vector<std::string> GetHotkeyNameList();
 			std::vector<json> GetSceneList();
+			std::vector<std::string> GetGroupList();
 			std::vector<json> GetSceneItemList(obs_scene_t *scene, bool basic = false);
 			std::vector<json> GetInputList(std::string inputKind = "");
 			std::vector<std::string> GetInputKindList(bool unversioned = false, bool includeDisabled = false);
 			std::vector<json> GetListPropertyItems(obs_property_t *property);
 			std::vector<std::string> GetTransitionKindList();
 			std::vector<json> GetSceneTransitionList();
+			std::vector<json> GetSourceFilterList(obs_source_t *source);
+			std::vector<std::string> GetFilterKindList();
 		}
 
 		namespace ObjectHelper {
@@ -206,6 +212,8 @@ namespace Utils {
 		namespace ActionHelper {
 			obs_sceneitem_t *CreateSceneItem(obs_source_t *source, obs_scene_t *scene, bool sceneItemEnabled = true, obs_transform_info *sceneItemTransform = nullptr, obs_sceneitem_crop *sceneItemCrop = nullptr); // Increments ref. Use OBSSceneItemAutoRelease
 			obs_sceneitem_t *CreateInput(std::string inputName, std::string inputKind, obs_data_t *inputSettings, obs_scene_t *scene, bool sceneItemEnabled = true); // Increments ref. Use OBSSceneItemAutoRelease
+			obs_source_t *CreateSourceFilter(obs_source_t *source, std::string filterName, std::string filterKind, obs_data_t *filterSettings); // Increments source ref. Use OBSSourceAutoRelease
+			void SetSourceFilterIndex(obs_source_t *source, obs_source_t *filter, size_t index);
 		}
 	}
 

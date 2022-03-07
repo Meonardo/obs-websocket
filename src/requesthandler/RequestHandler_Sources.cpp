@@ -392,6 +392,22 @@ RequestResult RequestHandler::CreateSource(const Request& request)
 
 	json responseData;
 	responseData["sceneItemId"] = obs_sceneitem_get_id(data.sceneItem);
+	return RequestResult::Success(responseData);
+}
+
+// Intentionally undocumented
+RequestResult RequestHandler::GetSourcePrivateSettings(const Request& request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateSource("sourceName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	OBSDataAutoRelease privateSettings = obs_source_get_private_settings(source);
+
+	json responseData;
+	responseData["sourceSettings"] = Utils::Json::ObsDataToJson(privateSettings);
 
 	return RequestResult::Success(responseData);
 }
@@ -476,4 +492,23 @@ RequestResult RequestHandler::GetSourceTypesList(const Request& request)
 	responseData = Utils::Json::ObsDataToJson(response);
 
 	return RequestResult::Success(responseData);
+}
+
+// Intentionally undocumented
+RequestResult RequestHandler::SetSourcePrivateSettings(const Request& request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateSource("sourceName", statusCode, comment);
+	if (!source || !request.ValidateObject("sourceSettings", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+
+	OBSDataAutoRelease privateSettings = obs_source_get_private_settings(source);
+
+	OBSDataAutoRelease newSettings = Utils::Json::JsonToObsData(request.RequestData["sourceSettings"]);
+
+	// Always overlays to prevent destroying internal source data unintentionally
+	obs_data_apply(privateSettings, newSettings);
+
+	return RequestResult::Success();
 }

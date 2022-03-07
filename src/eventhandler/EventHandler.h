@@ -107,9 +107,26 @@ class EventHandler
 		static void HandleInputShowStateChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleInputMuteStateChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleInputVolumeChanged(void *param, calldata_t *data); // Direct callback
+		static void HandleInputAudioBalanceChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleInputAudioSyncOffsetChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleInputAudioTracksChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleInputAudioMonitorTypeChanged(void *param, calldata_t *data); // Direct callback
+
+		// Transitions
+		void HandleCurrentSceneTransitionChanged();
+		void HandleCurrentSceneTransitionDurationChanged();
+		static void HandleSceneTransitionStarted(void *param, calldata_t *data); // Direct callback
+		static void HandleSceneTransitionEnded(void *param, calldata_t *data); // Direct callback
+		static void HandleSceneTransitionVideoEnded(void *param, calldata_t *data); // Direct callback
+
+		// Filters
+		static void FilterAddMultiHandler(void *param, calldata_t *data); // Direct callback
+		static void FilterRemoveMultiHandler(void *param, calldata_t *data); // Direct callback
+		static void HandleSourceFilterListReindexed(void *param, calldata_t *data); // Direct callback
+		void HandleSourceFilterCreated(obs_source_t *source, obs_source_t *filter);
+		void HandleSourceFilterRemoved(obs_source_t *source, obs_source_t *filter);
+		static void HandleSourceFilterNameChanged(void *param, calldata_t *data); // Direct callback
+		static void HandleSourceFilterEnableStateChanged(void *param, calldata_t *data); // Direct callback
 
 		// Outputs
 		void HandleStreamStateChanged(ObsOutputState state);
@@ -124,6 +141,7 @@ class EventHandler
 		static void HandleSceneItemListReindexed(void *param, calldata_t *data); // Direct callback
 		static void HandleSceneItemEnableStateChanged(void *param, calldata_t *data); // Direct callback
 		static void HandleSceneItemLockStateChanged(void *param, calldata_t *data); // Direct callback
+		static void HandleSceneItemSelected(void *param, calldata_t *data); // Direct callback
 		static void HandleSceneItemTransformChanged(void *param, calldata_t *data); // Direct callback
 
 		// Media Inputs

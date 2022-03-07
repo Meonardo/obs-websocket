@@ -64,12 +64,10 @@ std::string Utils::Obs::StringHelper::GetCurrentProfilePath()
 
 std::string Utils::Obs::StringHelper::GetCurrentRecordOutputPath()
 {
-	//char *recordOutputPath = obs_frontend_get_current_record_output_path();
-	//std::string ret = recordOutputPath;
-	//bfree(recordOutputPath);
-	//return ret;
-
-	return "";
+	char *recordOutputPath = obs_frontend_get_current_record_output_path();
+	std::string ret = recordOutputPath;
+	bfree(recordOutputPath);
+	return ret;
 }
 
 std::string Utils::Obs::StringHelper::GetSourceType(obs_source_t *source)
@@ -122,12 +120,19 @@ std::string Utils::Obs::StringHelper::GetMediaInputState(obs_source_t *input)
 std::string Utils::Obs::StringHelper::GetLastReplayBufferFilePath()
 {
 	OBSOutputAutoRelease output = obs_frontend_get_replay_buffer_output();
+	if (!output)
+		return "";
+
 	calldata_t cd = {0};
 	proc_handler_t *ph = obs_output_get_proc_handler(output);
 	proc_handler_call(ph, "get_last_replay", &cd);
-	auto ret = calldata_string(&cd, "path");
+	const char *savedReplayPath = calldata_string(&cd, "path");
 	calldata_free(&cd);
-	return ret;
+
+	if (!savedReplayPath)
+		return "";
+
+	return savedReplayPath;
 }
 
 std::string Utils::Obs::StringHelper::GetSceneItemBoundsType(enum obs_bounds_type type)
@@ -141,6 +146,20 @@ std::string Utils::Obs::StringHelper::GetSceneItemBoundsType(enum obs_bounds_typ
 		CASE(OBS_BOUNDS_SCALE_TO_WIDTH)
 		CASE(OBS_BOUNDS_SCALE_TO_HEIGHT)
 		CASE(OBS_BOUNDS_MAX_ONLY)
+	}
+}
+
+std::string Utils::Obs::StringHelper::GetSceneItemBlendMode(enum obs_blending_type mode)
+{
+	switch (mode) {
+		default:
+		CASE(OBS_BLEND_NORMAL)
+		CASE(OBS_BLEND_ADDITIVE)
+		CASE(OBS_BLEND_SUBTRACT)
+		CASE(OBS_BLEND_SCREEN)
+		CASE(OBS_BLEND_MULTIPLY)
+		CASE(OBS_BLEND_LIGHTEN)
+		CASE(OBS_BLEND_DARKEN)
 	}
 }
 

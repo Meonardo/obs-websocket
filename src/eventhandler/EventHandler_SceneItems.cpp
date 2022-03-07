@@ -37,7 +37,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  */
 void EventHandler::HandleSceneItemCreated(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
 	if (!scene)
@@ -74,7 +74,7 @@ void EventHandler::HandleSceneItemCreated(void *param, calldata_t *data)
  */
 void EventHandler::HandleSceneItemRemoved(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
 	if (!scene)
@@ -107,7 +107,7 @@ void EventHandler::HandleSceneItemRemoved(void *param, calldata_t *data)
  */
 void EventHandler::HandleSceneItemListReindexed(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
 	if (!scene)
@@ -136,7 +136,7 @@ void EventHandler::HandleSceneItemListReindexed(void *param, calldata_t *data)
  */
 void EventHandler::HandleSceneItemEnableStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
 	if (!scene)
@@ -158,9 +158,9 @@ void EventHandler::HandleSceneItemEnableStateChanged(void *param, calldata_t *da
 /**
  * A scene item's lock state has changed.
  *
- * @dataField sceneName        | String  | Name of the scene the item is in
- * @dataField sceneItemId      | Number  | Numeric ID of the scene item
- * @dataField sceneItemEnabled | Boolean | Whether the scene item is locked
+ * @dataField sceneName       | String  | Name of the scene the item is in
+ * @dataField sceneItemId     | Number  | Numeric ID of the scene item
+ * @dataField sceneItemLocked | Boolean | Whether the scene item is locked
  *
  * @eventType SceneItemLockStateChanged
  * @eventSubscription SceneItems
@@ -172,7 +172,7 @@ void EventHandler::HandleSceneItemEnableStateChanged(void *param, calldata_t *da
  */
 void EventHandler::HandleSceneItemLockStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
 	if (!scene)
@@ -192,6 +192,38 @@ void EventHandler::HandleSceneItemLockStateChanged(void *param, calldata_t *data
 }
 
 /**
+ * A scene item has been selected in the Ui.
+ *
+ * @dataField sceneName        | String  | Name of the scene the item is in
+ * @dataField sceneItemId      | Number  | Numeric ID of the scene item
+ *
+ * @eventType SceneItemSelected
+ * @eventSubscription SceneItems
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api events
+ * @category scene items
+ */
+void EventHandler::HandleSceneItemSelected(void *param, calldata_t *data)
+{
+	auto eventHandler = static_cast<EventHandler*>(param);
+
+	obs_scene_t *scene = GetCalldataPointer<obs_scene_t>(data, "scene");
+	if (!scene)
+		return;
+
+	obs_sceneitem_t *sceneItem = GetCalldataPointer<obs_sceneitem_t>(data, "item");
+	if (!sceneItem)
+		return;
+
+	json eventData;
+	eventData["sceneName"] = obs_source_get_name(obs_scene_get_source(scene));
+	eventData["sceneItemId"] = obs_sceneitem_get_id(sceneItem);
+	eventHandler->BroadcastEvent(EventSubscription::SceneItems, "SceneItemSelected", eventData);
+}
+
+/**
  * The transform/crop of a scene item has changed.
  *
  * @dataField sceneName          | String | The name of the scene the item is in
@@ -208,7 +240,7 @@ void EventHandler::HandleSceneItemLockStateChanged(void *param, calldata_t *data
  */
 void EventHandler::HandleSceneItemTransformChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	if (!eventHandler->_sceneItemTransformChangedRef.load())
 		return;

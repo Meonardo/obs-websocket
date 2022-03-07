@@ -17,9 +17,13 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+#ifdef PLUGIN_TESTS
+#include <util/profiler.hpp>
+#endif
+
 #include "RequestHandler.h"
 
-const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
+const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 {
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},
@@ -56,9 +60,12 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"SaveSourceScreenshot", &RequestHandler::SaveSourceScreenshot},
 	{"CreateSource", &RequestHandler::CreateSource},
 	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
+	{"GetSourcePrivateSettings", &RequestHandler::GetSourcePrivateSettings},
+	{"SetSourcePrivateSettings", &RequestHandler::SetSourcePrivateSettings},
 
 	// Scenes
 	{"GetSceneList", &RequestHandler::GetSceneList},
+	{"GetGroupList", &RequestHandler::GetGroupList},
 	{"GetCurrentProgramScene", &RequestHandler::GetCurrentProgramScene},
 	{"SetCurrentProgramScene", &RequestHandler::SetCurrentProgramScene},
 	{"GetCurrentPreviewScene", &RequestHandler::GetCurrentPreviewScene},
@@ -66,10 +73,13 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"CreateScene", &RequestHandler::CreateScene},
 	{"RemoveScene", &RequestHandler::RemoveScene},
 	{"SetSceneName", &RequestHandler::SetSceneName},
+	{"GetSceneSceneTransitionOverride", &RequestHandler::GetSceneSceneTransitionOverride},
+	{"SetSceneSceneTransitionOverride", &RequestHandler::SetSceneSceneTransitionOverride},
 
 	// Inputs
 	{"GetInputList", &RequestHandler::GetInputList},
 	{"GetInputKindList", &RequestHandler::GetInputKindList},
+	{"GetSpecialInputs", &RequestHandler::GetSpecialInputs},
 	{"CreateInput", &RequestHandler::CreateInput},
 	{"RemoveInput", &RequestHandler::RemoveInput},
 	{"SetInputName", &RequestHandler::SetInputName},
@@ -81,10 +91,14 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"ToggleInputMute", &RequestHandler::ToggleInputMute},
 	{"GetInputVolume", &RequestHandler::GetInputVolume},
 	{"SetInputVolume", &RequestHandler::SetInputVolume},
+	{"GetInputAudioBalance", &RequestHandler::GetInputAudioBalance},
+	{"SetInputAudioBalance", &RequestHandler::SetInputAudioBalance},
 	{"GetInputAudioSyncOffset", &RequestHandler::GetInputAudioSyncOffset},
 	{"SetInputAudioSyncOffset", &RequestHandler::SetInputAudioSyncOffset},
 	{"GetInputAudioMonitorType", &RequestHandler::GetInputAudioMonitorType},
 	{"SetInputAudioMonitorType", &RequestHandler::SetInputAudioMonitorType},
+	{"GetInputAudioTracks", &RequestHandler::GetInputAudioTracks},
+	{"SetInputAudioTracks", &RequestHandler::SetInputAudioTracks},
 	{"GetInputPropertiesListPropertyItems", &RequestHandler::GetInputPropertiesListPropertyItems},
 	{"PressInputPropertiesButton", &RequestHandler::PressInputPropertiesButton},
 
@@ -95,7 +109,20 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"SetCurrentSceneTransition", &RequestHandler::SetCurrentSceneTransition},
 	{"SetCurrentSceneTransitionDuration", &RequestHandler::SetCurrentSceneTransitionDuration},
 	{"SetCurrentSceneTransitionSettings", &RequestHandler::SetCurrentSceneTransitionSettings},
+	{"GetCurrentSceneTransitionCursor", &RequestHandler::GetCurrentSceneTransitionCursor},
 	{"TriggerStudioModeTransition", &RequestHandler::TriggerStudioModeTransition},
+	{"SetTBarPosition", &RequestHandler::SetTBarPosition},
+
+	// Filters
+	{"GetSourceFilterList", &RequestHandler::GetSourceFilterList},
+	{"GetSourceFilterDefaultSettings", &RequestHandler::GetSourceFilterDefaultSettings},
+	{"CreateSourceFilter", &RequestHandler::CreateSourceFilter},
+	{"RemoveSourceFilter", &RequestHandler::RemoveSourceFilter},
+	{"SetSourceFilterName", &RequestHandler::SetSourceFilterName},
+	{"GetSourceFilter", &RequestHandler::GetSourceFilter},
+	{"SetSourceFilterIndex", &RequestHandler::SetSourceFilterIndex},
+	{"SetSourceFilterSettings", &RequestHandler::SetSourceFilterSettings},
+	{"SetSourceFilterEnabled", &RequestHandler::SetSourceFilterEnabled},
 
 	// Scene Items
 	{"GetSceneItemList", &RequestHandler::GetSceneItemList},
@@ -113,12 +140,27 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	{"GetSceneItemIndex", &RequestHandler::GetSceneItemIndex},
 	{"SetSceneItemIndex", &RequestHandler::SetSceneItemIndex},
 	{"SetSceneItemProperties", &RequestHandler::SetSceneItemProperties},
+	{"GetSceneItemBlendMode", &RequestHandler::GetSceneItemBlendMode},
+	{"SetSceneItemBlendMode", &RequestHandler::SetSceneItemBlendMode},
+
+	// Outputs
+	{"GetVirtualCamStatus", &RequestHandler::GetVirtualCamStatus},
+	{"ToggleVirtualCam", &RequestHandler::ToggleVirtualCam},
+	{"StartVirtualCam", &RequestHandler::StartVirtualCam},
+	{"StopVirtualCam", &RequestHandler::StopVirtualCam},
+	{"GetReplayBufferStatus", &RequestHandler::GetReplayBufferStatus},
+	{"ToggleReplayBuffer", &RequestHandler::ToggleReplayBuffer},
+	{"StartReplayBuffer", &RequestHandler::StartReplayBuffer},
+	{"StopReplayBuffer", &RequestHandler::StopReplayBuffer},
+	{"SaveReplayBuffer", &RequestHandler::SaveReplayBuffer},
+	{"GetLastReplayBufferReplay", &RequestHandler::GetLastReplayBufferReplay},
 
 	// Stream
 	{"GetStreamStatus", &RequestHandler::GetStreamStatus},
 	{"ToggleStream", &RequestHandler::ToggleStream},
 	{"StartStream", &RequestHandler::StartStream},
 	{"StopStream", &RequestHandler::StopStream},
+	{"SendStreamCaption", &RequestHandler::SendStreamCaption},
 
 	// Record
 	{"GetRecordStatus", &RequestHandler::GetRecordStatus},
@@ -140,6 +182,9 @@ const std::map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
 	// Ui
 	{"GetStudioModeEnabled", &RequestHandler::GetStudioModeEnabled},
 	{"SetStudioModeEnabled", &RequestHandler::SetStudioModeEnabled},
+	{"OpenInputPropertiesDialog", &RequestHandler::OpenInputPropertiesDialog},
+	{"OpenInputFiltersDialog", &RequestHandler::OpenInputFiltersDialog},
+	{"OpenInputInteractDialog", &RequestHandler::OpenInputInteractDialog},
 };
 
 RequestHandler::RequestHandler(SessionPtr session) :
@@ -149,6 +194,10 @@ RequestHandler::RequestHandler(SessionPtr session) :
 
 RequestResult RequestHandler::ProcessRequest(const Request& request)
 {
+#ifdef PLUGIN_TESTS
+	ScopeProfiler prof{"obs_websocket_request_processing"};
+#endif
+
 	if (!request.RequestData.is_object() && !request.RequestData.is_null())
 		return RequestResult::Error(RequestStatus::InvalidRequestFieldType, "Your request data is not an object.");
 

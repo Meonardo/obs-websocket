@@ -111,7 +111,7 @@ void EventHandler::HandleInputNameChanged(obs_source_t *, std::string oldInputNa
  */
 void EventHandler::HandleInputActiveStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	if (!eventHandler->_inputActiveStateChangedRef.load())
 		return;
@@ -147,7 +147,7 @@ void EventHandler::HandleInputActiveStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputShowStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	if (!eventHandler->_inputShowStateChangedRef.load())
 		return;
@@ -181,7 +181,7 @@ void EventHandler::HandleInputShowStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputMuteStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -213,7 +213,7 @@ void EventHandler::HandleInputMuteStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -237,6 +237,39 @@ void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
 }
 
 /**
+ * The audio balance value of an input has changed.
+ *
+ * @dataField inputName         | String | Name of the affected input
+ * @dataField inputAudioBalance | Number | New audio balance value of the input
+ *
+ * @eventType InputAudioBalanceChanged
+ * @eventSubscription Inputs
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @category inputs
+ * @api events
+ */
+void EventHandler::HandleInputAudioBalanceChanged(void *param, calldata_t *data)
+{
+	auto eventHandler = static_cast<EventHandler*>(param);
+
+	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
+	if (!source)
+		return;
+
+	if (obs_source_get_type(source) != OBS_SOURCE_TYPE_INPUT)
+		return;
+
+	float inputAudioBalance = (float)calldata_float(data, "balance");
+
+	json eventData;
+	eventData["inputName"] = obs_source_get_name(source);
+	eventData["inputAudioBalance"] = inputAudioBalance;
+	eventHandler->BroadcastEvent(EventSubscription::Inputs, "InputAudioBalanceChanged", eventData);
+}
+
+/**
  * The sync offset of an input has changed.
  *
  * @dataField inputName            | String | Name of the input
@@ -252,7 +285,7 @@ void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputAudioSyncOffsetChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -272,8 +305,8 @@ void EventHandler::HandleInputAudioSyncOffsetChanged(void *param, calldata_t *da
 /**
  * The audio tracks of an input have changed.
  *
- * @dataField inputName        | String         | Name of the input
- * @dataField inputAudioTracks | Array<Boolean> | Array of audio tracks along with their associated enable states
+ * @dataField inputName        | String | Name of the input
+ * @dataField inputAudioTracks | Object | Object of audio tracks along with their associated enable states
  *
  * @eventType InputAudioTracksChanged
  * @eventSubscription Inputs
@@ -285,7 +318,7 @@ void EventHandler::HandleInputAudioSyncOffsetChanged(void *param, calldata_t *da
  */
 void EventHandler::HandleInputAudioTracksChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -328,7 +361,7 @@ void EventHandler::HandleInputAudioTracksChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputAudioMonitorTypeChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = reinterpret_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler*>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)

@@ -406,6 +406,14 @@
           "enumValue": 606
         },
         {
+          "description": "The specified filter (obs_source_t-OBS_SOURCE_TYPE_FILTER) had the wrong kind.",
+          "enumIdentifier": "InvalidFilterKind",
+          "rpcVersion": "1",
+          "deprecated": false,
+          "initialVersion": "5.0.0",
+          "enumValue": 607
+        },
+        {
           "description": "Creating the resource failed.",
           "enumIdentifier": "ResourceCreationFailed",
           "rpcVersion": "1",
@@ -1130,6 +1138,312 @@
       "responseFields": []
     },
     {
+      "description": "Gets the current directory that the record output is set to.",
+      "requestType": "GetRecordDirectory",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "rconfig",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "recordDirectory",
+          "valueType": "String",
+          "valueDescription": "Output directory"
+        }
+      ]
+    },
+    {
+      "description": "Gets an array of all of a source's filters.",
+      "requestType": "GetSourceFilterList",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "filters",
+          "valueType": "Array<Object>",
+          "valueDescription": "Array of filters"
+        }
+      ]
+    },
+    {
+      "description": "Gets the default settings for a filter kind.",
+      "requestType": "GetSourceFilterDefaultSettings",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "filterKind",
+          "valueType": "String",
+          "valueDescription": "Filter kind to get the default settings for",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "defaultFilterSettings",
+          "valueType": "Object",
+          "valueDescription": "Object of default settings for the filter kind"
+        }
+      ]
+    },
+    {
+      "description": "Creates a new filter, adding it to the specified source.",
+      "requestType": "CreateSourceFilter",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source to add the filter to",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the new filter to be created",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterKind",
+          "valueType": "String",
+          "valueDescription": "The kind of filter to be created",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterSettings",
+          "valueType": "Object",
+          "valueDescription": "Settings object to initialize the filter with",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "Default settings used"
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Removes a filter from a source.",
+      "requestType": "RemoveSourceFilter",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter to remove",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Sets the name of a source filter (rename).",
+      "requestType": "SetSourceFilterName",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Current name of the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "newFilterName",
+          "valueType": "String",
+          "valueDescription": "New name for the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the info for a specific source filter.",
+      "requestType": "GetSourceFilter",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "filterEnabled",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the filter is enabled"
+        },
+        {
+          "valueName": "filterIndex",
+          "valueType": "Number",
+          "valueDescription": "Index of the filter in the list, beginning at 0"
+        },
+        {
+          "valueName": "filterKind",
+          "valueType": "String",
+          "valueDescription": "The kind of filter"
+        },
+        {
+          "valueName": "filterSettings",
+          "valueType": "Object",
+          "valueDescription": "Settings object associated with the filter"
+        }
+      ]
+    },
+    {
+      "description": "Sets the index position of a filter on a source.",
+      "requestType": "SetSourceFilterIndex",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterIndex",
+          "valueType": "Number",
+          "valueDescription": "New index position of the filter",
+          "valueRestrictions": ">= 0",
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Sets the settings of a source filter.",
+      "requestType": "SetSourceFilterSettings",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter to set the settings of",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterSettings",
+          "valueType": "Object",
+          "valueDescription": "Object of settings to apply",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "overlay",
+          "valueType": "Boolean",
+          "valueDescription": "True == apply the settings on top of existing ones, False == reset the input to its defaults, then apply settings.",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "true"
+        }
+      ],
+      "responseFields": []
+    },
+    {
       "description": "Gets data about the current plugin and RPC version.",
       "requestType": "GetVersion",
       "complexity": 1,
@@ -1473,6 +1787,48 @@
       ]
     },
     {
+      "description": "Gets the names of all special inputs.",
+      "requestType": "GetSpecialInputs",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "desktop1",
+          "valueType": "String",
+          "valueDescription": "Name of the Desktop Audio input"
+        },
+        {
+          "valueName": "desktop2",
+          "valueType": "String",
+          "valueDescription": "Name of the Desktop Audio 2 input"
+        },
+        {
+          "valueName": "mic1",
+          "valueType": "String",
+          "valueDescription": "Name of the Mic/Auxiliary Audio input"
+        },
+        {
+          "valueName": "mic2",
+          "valueType": "String",
+          "valueDescription": "Name of the Mic/Auxiliary Audio 2 input"
+        },
+        {
+          "valueName": "mic3",
+          "valueType": "String",
+          "valueDescription": "Name of the Mic/Auxiliary Audio 3 input"
+        },
+        {
+          "valueName": "mic4",
+          "valueType": "String",
+          "valueDescription": "Name of the Mic/Auxiliary Audio 4 input"
+        }
+      ]
+    },
+    {
       "description": "Creates a new input, adding it as a scene item to the specified scene.",
       "requestType": "CreateInput",
       "complexity": 3,
@@ -1811,9 +2167,63 @@
           "valueName": "inputVolumeDb",
           "valueType": "Number",
           "valueDescription": "Volume setting in dB",
-          "valueRestrictions": ">= -100, <= -26",
+          "valueRestrictions": ">= -100, <= 26",
           "valueOptional": true,
           "valueOptionalBehavior": "`inputVolumeMul` should be specified"
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the audio balance of an input.",
+      "requestType": "GetInputAudioBalance",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input to get the audio balance of",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "inputAudioBalance",
+          "valueType": "Number",
+          "valueDescription": "Audio balance value from 0.0-1.0"
+        }
+      ]
+    },
+    {
+      "description": "Sets the audio balance of an input.",
+      "requestType": "SetInputAudioBalance",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input to set the audio balance of",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "inputAudioBalance",
+          "valueType": "Number",
+          "valueDescription": "New audio balance value",
+          "valueRestrictions": ">= 0.0, <= 1.0",
+          "valueOptional": false,
+          "valueOptionalBehavior": null
         }
       ],
       "responseFields": []
@@ -1919,6 +2329,60 @@
           "valueName": "monitorType",
           "valueType": "String",
           "valueDescription": "Audio monitor type",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the enable state of all audio tracks of an input.",
+      "requestType": "GetInputAudioTracks",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "inputAudioTracks",
+          "valueType": "Object",
+          "valueDescription": "Object of audio tracks and associated enable states"
+        }
+      ]
+    },
+    {
+      "description": "Sets the enable state of audio tracks of an input.",
+      "requestType": "SetInputAudioTracks",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "inputAudioTracks",
+          "valueType": "Object",
+          "valueDescription": "Track settings to apply",
           "valueRestrictions": null,
           "valueOptional": false,
           "valueOptionalBehavior": null
@@ -2109,6 +2573,146 @@
       "responseFields": []
     },
     {
+      "description": "Gets the status of the virtualcam output.",
+      "requestType": "GetVirtualCamStatus",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        }
+      ]
+    },
+    {
+      "description": "Toggles the state of the virtualcam output.",
+      "requestType": "ToggleVirtualCam",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        }
+      ]
+    },
+    {
+      "description": "Starts the virtualcam output.",
+      "requestType": "StartVirtualCam",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Stops the virtualcam output.",
+      "requestType": "StopVirtualCam",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the status of the replay buffer output.",
+      "requestType": "GetReplayBufferStatus",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        }
+      ]
+    },
+    {
+      "description": "Toggles the state of the replay buffer output.",
+      "requestType": "ToggleReplayBuffer",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        }
+      ]
+    },
+    {
+      "description": "Starts the replay buffer output.",
+      "requestType": "StartReplayBuffer",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Stops the replay buffer output.",
+      "requestType": "StopReplayBuffer",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Saves the contents of the replay buffer output.",
+      "requestType": "SaveReplayBuffer",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the filename of the last replay buffer save file.",
+      "requestType": "GetLastReplayBufferReplay",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "savedReplayPath",
+          "valueType": "String",
+          "valueDescription": "File path"
+        }
+      ]
+    },
+    {
       "description": "Gets the status of the record output.",
       "requestType": "GetRecordStatus",
       "complexity": 2,
@@ -2210,23 +2814,6 @@
       "category": "record",
       "requestFields": [],
       "responseFields": []
-    },
-    {
-      "description": "Gets the current directory that the record output is set to.",
-      "requestType": "GetRecordDirectory",
-      "complexity": 1,
-      "rpcVersion": "1",
-      "deprecated": false,
-      "initialVersion": "5.0.0",
-      "category": "record",
-      "requestFields": [],
-      "responseFields": [
-        {
-          "valueName": "recordDirectory",
-          "valueType": "String",
-          "valueDescription": "Output directory"
-        }
-      ]
     },
     {
       "description": "Gets a list of all scene items in a scene.\n\nScenes only",
@@ -2707,6 +3294,76 @@
       "responseFields": []
     },
     {
+      "description": "Gets the blend mode of a scene item.\n\nBlend modes:\n\n- `OBS_BLEND_NORMAL`\n- `OBS_BLEND_ADDITIVE`\n- `OBS_BLEND_SUBTRACT`\n- `OBS_BLEND_SCREEN`\n- `OBS_BLEND_MULTIPLY`\n- `OBS_BLEND_LIGHTEN`\n- `OBS_BLEND_DARKEN`\n\nScenes and Groups",
+      "requestType": "GetSceneItemBlendMode",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scene items",
+      "requestFields": [
+        {
+          "valueName": "sceneName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene the item is in",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "sceneItemId",
+          "valueType": "Number",
+          "valueDescription": "Numeric ID of the scene item",
+          "valueRestrictions": ">= 0",
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "sceneItemBlendMode",
+          "valueType": "String",
+          "valueDescription": "Current blend mode"
+        }
+      ]
+    },
+    {
+      "description": "Sets the blend mode of a scene item.\n\nScenes and Groups",
+      "requestType": "SetSceneItemBlendMode",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scene items",
+      "requestFields": [
+        {
+          "valueName": "sceneName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene the item is in",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "sceneItemId",
+          "valueType": "Number",
+          "valueDescription": "Numeric ID of the scene item",
+          "valueRestrictions": ">= 0",
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "sceneItemBlendMode",
+          "valueType": "String",
+          "valueDescription": "New blend mode",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
       "description": "Gets an array of all scenes in OBS.",
       "requestType": "GetSceneList",
       "complexity": 2,
@@ -2729,7 +3386,24 @@
         {
           "valueName": "scenes",
           "valueType": "Array<Object>",
-          "valueDescription": "Array of scenes in OBS"
+          "valueDescription": "Array of scenes"
+        }
+      ]
+    },
+    {
+      "description": "Gets an array of all groups in OBS.\n\nGroups in OBS are actually scenes, but renamed and modified. In obs-websocket, we treat them as scenes where we can.",
+      "requestType": "GetGroupList",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scenes",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "groups",
+          "valueType": "Array<String>",
+          "valueDescription": "Array of group names"
         }
       ]
     },
@@ -2871,6 +3545,73 @@
           "valueRestrictions": null,
           "valueOptional": false,
           "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the scene transition overridden for a scene.",
+      "requestType": "GetSceneSceneTransitionOverride",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scenes",
+      "requestFields": [
+        {
+          "valueName": "sceneName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Name of the overridden scene transition, else `null`"
+        },
+        {
+          "valueName": "transitionDuration",
+          "valueType": "Number",
+          "valueDescription": "Duration of the overridden scene transition, else `null`"
+        }
+      ]
+    },
+    {
+      "description": "Gets the scene transition overridden for a scene.",
+      "requestType": "SetSceneSceneTransitionOverride",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scenes",
+      "requestFields": [
+        {
+          "valueName": "sceneName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene transition to use as override. Specify `null` to remove",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "Unchanged"
+        },
+        {
+          "valueName": "transitionDuration",
+          "valueType": "Number",
+          "valueDescription": "Duration to use for any overridden transition. Specify `null` to remove",
+          "valueRestrictions": ">= 50, <= 20000",
+          "valueOptional": true,
+          "valueOptionalBehavior": "Unchanged"
         }
       ],
       "responseFields": []
@@ -3117,6 +3858,26 @@
       "responseFields": []
     },
     {
+      "description": "Sends CEA-608 caption text over the stream output.",
+      "requestType": "SendStreamCaption",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "stream",
+      "requestFields": [
+        {
+          "valueName": "captionText",
+          "valueType": "String",
+          "valueDescription": "Caption text",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
       "description": "Gets an array of all available transition kinds.\n\nSimilar to `GetInputKindList`",
       "requestType": "GetTransitionKindList",
       "complexity": 2,
@@ -3271,6 +4032,23 @@
       "responseFields": []
     },
     {
+      "description": "Gets the cursor position of the current scene transition.\n\nNote: `transitionCursor` will return 1.0 when the transition is inactive.",
+      "requestType": "GetCurrentSceneTransitionCursor",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "transitionCursor",
+          "valueType": "Number",
+          "valueDescription": "Cursor position, between 0.0 and 1.0"
+        }
+      ]
+    },
+    {
       "description": "Triggers the current scene transition. Same functionality as the `Transition` button in studio mode.",
       "requestType": "TriggerStudioModeTransition",
       "complexity": 1,
@@ -3279,6 +4057,34 @@
       "initialVersion": "5.0.0",
       "category": "transitions",
       "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Sets the position of the TBar.\n\n**Very important note**: This will be deprecated and replaced in a future version of obs-websocket.",
+      "requestType": "SetTBarPosition",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "requestFields": [
+        {
+          "valueName": "position",
+          "valueType": "Number",
+          "valueDescription": "New position",
+          "valueRestrictions": ">= 0.0, <= 1.0",
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "release",
+          "valueType": "Boolean",
+          "valueDescription": "Whether to release the TBar. Only set `false` if you know that you will be sending another position update",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "`true`"
+        }
+      ],
       "responseFields": []
     },
     {
@@ -3311,6 +4117,66 @@
           "valueName": "studioModeEnabled",
           "valueType": "Boolean",
           "valueDescription": "True == Enabled, False == Disabled",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Opens the properties dialog of an input.",
+      "requestType": "OpenInputPropertiesDialog",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input to open the dialog of",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Opens the filters dialog of an input.",
+      "requestType": "OpenInputFiltersDialog",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input to open the dialog of",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Opens the interact dialog of an input.",
+      "requestType": "OpenInputInteractDialog",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the input to open the dialog of",
           "valueRestrictions": null,
           "valueOptional": false,
           "valueOptionalBehavior": null
@@ -3419,6 +4285,146 @@
           "valueName": "profiles",
           "valueType": "Array<String>",
           "valueDescription": "Updated list of profiles"
+        }
+      ]
+    },
+    {
+      "description": "A source's filter list has been reindexed.",
+      "eventType": "SourceFilterListReindexed",
+      "eventSubscription": "Filters",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "dataFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source"
+        },
+        {
+          "valueName": "filters",
+          "valueType": "Array<Object>",
+          "valueDescription": "Array of filter objects"
+        }
+      ]
+    },
+    {
+      "description": "A filter has been added to a source.",
+      "eventType": "SourceFilterCreated",
+      "eventSubscription": "Filters",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "dataFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter was added to"
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter"
+        },
+        {
+          "valueName": "filterKind",
+          "valueType": "String",
+          "valueDescription": "The kind of the filter"
+        },
+        {
+          "valueName": "filterIndex",
+          "valueType": "Number",
+          "valueDescription": "Index position of the filter"
+        },
+        {
+          "valueName": "filterSettings",
+          "valueType": "Object",
+          "valueDescription": "The settings configured to the filter when it was created"
+        },
+        {
+          "valueName": "defaultFilterSettings",
+          "valueType": "Object",
+          "valueDescription": "The default settings for the filter"
+        }
+      ]
+    },
+    {
+      "description": "A filter has been removed from a source.",
+      "eventType": "SourceFilterRemoved",
+      "eventSubscription": "Filters",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "dataFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter was on"
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter"
+        }
+      ]
+    },
+    {
+      "description": "The name of a source filter has changed.",
+      "eventType": "SourceFilterNameChanged",
+      "eventSubscription": "Filters",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "dataFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "The source the filter is on"
+        },
+        {
+          "valueName": "oldFilterName",
+          "valueType": "String",
+          "valueDescription": "Old name of the filter"
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "New name of the filter"
+        }
+      ]
+    },
+    {
+      "description": "A source filter's enable state has changed.",
+      "eventType": "SourceFilterEnableStateChanged",
+      "eventSubscription": "Filters",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "dataFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on"
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter"
+        },
+        {
+          "valueName": "filterEnabled",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the filter is enabled"
         }
       ]
     },
@@ -3603,6 +4609,28 @@
       ]
     },
     {
+      "description": "The audio balance value of an input has changed.",
+      "eventType": "InputAudioBalanceChanged",
+      "eventSubscription": "Inputs",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "inputs",
+      "dataFields": [
+        {
+          "valueName": "inputName",
+          "valueType": "String",
+          "valueDescription": "Name of the affected input"
+        },
+        {
+          "valueName": "inputAudioBalance",
+          "valueType": "Number",
+          "valueDescription": "New audio balance value of the input"
+        }
+      ]
+    },
+    {
       "description": "The sync offset of an input has changed.",
       "eventType": "InputAudioSyncOffsetChanged",
       "eventSubscription": "Inputs",
@@ -3641,8 +4669,8 @@
         },
         {
           "valueName": "inputAudioTracks",
-          "valueType": "Array<Boolean>",
-          "valueDescription": "Array of audio tracks along with their associated enable states"
+          "valueType": "Object",
+          "valueDescription": "Object of audio tracks along with their associated enable states"
         }
       ]
     },
@@ -3975,9 +5003,31 @@
           "valueDescription": "Numeric ID of the scene item"
         },
         {
-          "valueName": "sceneItemEnabled",
+          "valueName": "sceneItemLocked",
           "valueType": "Boolean",
           "valueDescription": "Whether the scene item is locked"
+        }
+      ]
+    },
+    {
+      "description": "A scene item has been selected in the Ui.",
+      "eventType": "SceneItemSelected",
+      "eventSubscription": "SceneItems",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "scene items",
+      "dataFields": [
+        {
+          "valueName": "sceneName",
+          "valueType": "String",
+          "valueDescription": "Name of the scene the item is in"
+        },
+        {
+          "valueName": "sceneItemId",
+          "valueType": "Number",
+          "valueDescription": "Numeric ID of the scene item"
         }
       ]
     },
@@ -4122,6 +5172,91 @@
           "valueName": "scenes",
           "valueType": "Array<Object>",
           "valueDescription": "Updated array of scenes"
+        }
+      ]
+    },
+    {
+      "description": "The current scene transition has changed.",
+      "eventType": "CurrentSceneTransitionChanged",
+      "eventSubscription": "Transitions",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "dataFields": [
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Name of the new transition"
+        }
+      ]
+    },
+    {
+      "description": "The current scene transition duration has changed.",
+      "eventType": "CurrentSceneTransitionDurationChanged",
+      "eventSubscription": "Transitions",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "dataFields": [
+        {
+          "valueName": "transitionDuration",
+          "valueType": "Number",
+          "valueDescription": "Transition duration in milliseconds"
+        }
+      ]
+    },
+    {
+      "description": "A scene transition has started.",
+      "eventType": "SceneTransitionStarted",
+      "eventSubscription": "Transitions",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "dataFields": [
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Scene transition name"
+        }
+      ]
+    },
+    {
+      "description": "A scene transition has completed fully.\n\nNote: Does not appear to trigger when the transition is interrupted by the user.",
+      "eventType": "SceneTransitionEnded",
+      "eventSubscription": "Transitions",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "dataFields": [
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Scene transition name"
+        }
+      ]
+    },
+    {
+      "description": "A scene transition's video has completed fully.\n\nUseful for stinger transitions to tell when the video *actually* ends.\n`SceneTransitionEnded` only signifies the cut point, not the completion of transition playback.\n\nNote: Appears to be called by every transition, regardless of relevance.",
+      "eventType": "SceneTransitionVideoEnded",
+      "eventSubscription": "Transitions",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "transitions",
+      "dataFields": [
+        {
+          "valueName": "transitionName",
+          "valueType": "String",
+          "valueDescription": "Scene transition name"
         }
       ]
     },

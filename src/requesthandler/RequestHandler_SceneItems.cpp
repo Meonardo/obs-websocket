@@ -232,8 +232,9 @@ RequestResult RequestHandler::DuplicateSceneItem(const Request& request)
 		if (!destinationScene)
 			return RequestResult::Error(statusCode, comment);
 	} else {
-		destinationScene = obs_sceneitem_get_scene(sceneItem);
-		obs_scene_addref(destinationScene);
+		destinationScene = obs_scene_get_ref(obs_sceneitem_get_scene(sceneItem));
+		if (!destinationScene)
+			return RequestResult::Error(RequestStatus::RequestProcessingFailed, "Internal error: Failed to get ref for scene of scene item.");
 	}
 
 	if (obs_sceneitem_is_group(sceneItem) && obs_sceneitem_get_scene(sceneItem) == destinationScene) {
@@ -632,8 +633,8 @@ RequestResult RequestHandler::SetSceneItemIndex(const Request& request)
 	return RequestResult::Success();
 }
 
-RequestResult RequestHandler::SetSceneItemProperties(const Request& request) {
-
+RequestResult RequestHandler::SetSceneItemProperties(const Request& request) 
+{
 	RequestStatus::RequestStatus statusCode = RequestStatus::InvalidRequestField;
 	std::string comment;
 	if (!request.Contains("item")) {
@@ -817,4 +818,82 @@ RequestResult RequestHandler::SetSceneItemProperties(const Request& request) {
 	responseData["sceneItemId"] = obs_sceneitem_get_id(sceneItem);
 
 	return RequestResult::Success(responseData);
+}
+
+/**
+ * Gets the blend mode of a scene item.
+ *
+ * Blend modes:
+ *
+ * - `OBS_BLEND_NORMAL`
+ * - `OBS_BLEND_ADDITIVE`
+ * - `OBS_BLEND_SUBTRACT`
+ * - `OBS_BLEND_SCREEN`
+ * - `OBS_BLEND_MULTIPLY`
+ * - `OBS_BLEND_LIGHTEN`
+ * - `OBS_BLEND_DARKEN`
+ *
+ * Scenes and Groups
+ *
+ * @requestField sceneName   | String | Name of the scene the item is in
+ * @requestField sceneItemId | Number | Numeric ID of the scene item | >= 0
+ *
+ * @responseField sceneItemBlendMode | String | Current blend mode
+ *
+ * @requestType GetSceneItemBlendMode
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category scene items
+ */
+RequestResult RequestHandler::GetSceneItemBlendMode(const Request& request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSceneItemAutoRelease sceneItem = request.ValidateSceneItem("sceneName", "sceneItemId", statusCode, comment, OBS_WEBSOCKET_SCENE_FILTER_SCENE_OR_GROUP);
+	if (!sceneItem)
+		return RequestResult::Error(statusCode, comment);
+
+	auto blendMode = obs_sceneitem_get_blending_mode(sceneItem);
+
+	json responseData;
+	responseData["sceneItemBlendMode"] = Utils::Obs::StringHelper::GetSceneItemBlendMode(blendMode);
+
+	return RequestResult::Success(responseData);
+}
+
+/**
+ * Sets the blend mode of a scene item.
+ *
+ * Scenes and Groups
+ *
+ * @requestField sceneName          | String | Name of the scene the item is in
+ * @requestField sceneItemId        | Number | Numeric ID of the scene item | >= 0
+ * @requestField sceneItemBlendMode | String | New blend mode
+ *
+ * @requestType SetSceneItemBlendMode
+ * @complexity 2
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category scene items
+ */
+RequestResult RequestHandler::SetSceneItemBlendMode(const Request& request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSceneItemAutoRelease sceneItem = request.ValidateSceneItem("sceneName", "sceneItemId", statusCode, comment, OBS_WEBSOCKET_SCENE_FILTER_SCENE_OR_GROUP);
+	if (!(sceneItem && request.ValidateString("sceneItemBlendMode", statusCode, comment)))
+		return RequestResult::Error(statusCode, comment);
+
+	std::string blendModeString = request.RequestData["sceneItemBlendMode"];
+
+	auto blendMode = Utils::Obs::EnumHelper::GetSceneItemBlendMode(blendModeString);
+	if (blendMode == OBS_BLEND_NORMAL && blendModeString != "OBS_BLEND_NORMAL")
+		return RequestResult::Error(RequestStatus::InvalidRequestField, "The field sceneItemBlendMode has an invalid value.");
+
+	obs_sceneitem_set_blending_mode(sceneItem, blendMode);
+
+	return RequestResult::Success();
 }

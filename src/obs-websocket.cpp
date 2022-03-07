@@ -48,6 +48,7 @@ bool obs_module_load(void)
 {
 	blog(LOG_INFO, "[obs_module_load] you can haz websockets (Version: %s | RPC Version: %d)", OBS_WEBSOCKET_VERSION, OBS_WEBSOCKET_RPC_VERSION);
 	blog(LOG_INFO, "[obs_module_load] Qt version (compile-time): %s | Qt version (run-time): %s", QT_VERSION_STR, qVersion());
+	blog(LOG_INFO, "[obs_module_load] Linked ASIO Version: %d", ASIO_VERSION);
 
 	// Initialize the cpu stats
 	_cpuUsageInfo = os_cpu_usage_info_start();
@@ -68,7 +69,7 @@ bool obs_module_load(void)
 
 	// Initialize the settings dialog
 	obs_frontend_push_ui_translation(obs_module_get_string);
-	QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(obs_frontend_get_main_window());
+	QMainWindow* mainWindow = static_cast<QMainWindow*>(obs_frontend_get_main_window());
 	_settingsDialog = new SettingsDialog(mainWindow);
 	obs_frontend_pop_ui_translation();
 
