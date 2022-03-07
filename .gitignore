@@ -12,3 +12,5 @@
 /src/plugin-macros.generated.h
 /installer/installer-windows.generated.iss
 /cmake-build-debug/
+/.vs/
+/out/
