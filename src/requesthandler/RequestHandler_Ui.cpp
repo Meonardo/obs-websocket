@@ -174,10 +174,9 @@ RequestResult RequestHandler::GetMonitorList(const Request&)
 	{
 		json screenData = json::object();
 		QScreen const* screen = screensList[screenIndex];
-		std::stringstream nameAndIndex;
-		nameAndIndex << screen->name().toStdString();
-		nameAndIndex << '(' << screenIndex << ')';
-		screenData["monitorName"] = nameAndIndex.str();
+		
+		screenData["monitorIndex"] = screenIndex;
+		screenData["monitorName"] = screen->name().toStdString();
 		const QRect screenGeometry = screen->geometry();
 		screenData["monitorWidth"] = screenGeometry.width();
 		screenData["monitorHeight"] = screenGeometry.height();
