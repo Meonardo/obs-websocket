@@ -37,12 +37,12 @@ QString GetToolTipIconHtml()
 	return iconTemplate.arg(iconFile);
 }
 
-SettingsDialog::SettingsDialog(QWidget* parent) :
-	QDialog(parent, Qt::Dialog),
-	ui(new Ui::SettingsDialog),
-	connectInfo(new ConnectInfo),
-	sessionTableTimer(new QTimer),
-	passwordManuallyEdited(false)
+SettingsDialog::SettingsDialog(QWidget *parent)
+	: QDialog(parent, Qt::Dialog),
+	  ui(new Ui::SettingsDialog),
+	  connectInfo(new ConnectInfo),
+	  sessionTableTimer(new QTimer),
+	  passwordManuallyEdited(false)
 {
 	ui->setupUi(this);
 	ui->websocketSessionTable->horizontalHeader()->resizeSection(3, 100); // Resize Session Table column widths
@@ -54,18 +54,13 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 	// Set the appropriate tooltip icon for the theme
 	ui->enableDebugLoggingToolTipLabel->setText(GetToolTipIconHtml());
 
-	connect(sessionTableTimer, &QTimer::timeout,
-		this, &SettingsDialog::FillSessionTable);
-	connect(ui->buttonBox, &QDialogButtonBox::clicked,
-		this, &SettingsDialog::DialogButtonClicked);
-	connect(ui->enableAuthenticationCheckBox, &QCheckBox::stateChanged,
-		this, &SettingsDialog::EnableAuthenticationCheckBoxChanged);
-	connect(ui->generatePasswordButton, &QPushButton::clicked,
-		this, &SettingsDialog::GeneratePasswordButtonClicked);
-	connect(ui->showConnectInfoButton, &QPushButton::clicked,
-		this, &SettingsDialog::ShowConnectInfoButtonClicked);
-	connect(ui->serverPasswordLineEdit, &QLineEdit::textEdited,
-		this, &SettingsDialog::PasswordEdited);
+	connect(sessionTableTimer, &QTimer::timeout, this, &SettingsDialog::FillSessionTable);
+	connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &SettingsDialog::DialogButtonClicked);
+	connect(ui->enableAuthenticationCheckBox, &QCheckBox::stateChanged, this,
+		&SettingsDialog::EnableAuthenticationCheckBoxChanged);
+	connect(ui->generatePasswordButton, &QPushButton::clicked, this, &SettingsDialog::GeneratePasswordButtonClicked);
+	connect(ui->showConnectInfoButton, &QPushButton::clicked, this, &SettingsDialog::ShowConnectInfoButtonClicked);
+	connect(ui->serverPasswordLineEdit, &QLineEdit::textEdited, this, &SettingsDialog::PasswordEdited);
 }
 
 SettingsDialog::~SettingsDialog()
@@ -83,18 +78,8 @@ void SettingsDialog::showEvent(QShowEvent *)
 		return;
 	}
 
-	ui->enableWebSocketServerCheckBox->setChecked(conf->ServerEnabled);
-	ui->enableSystemTrayAlertsCheckBox->setChecked(conf->AlertsEnabled);
-	ui->enableDebugLoggingCheckBox->setChecked(conf->DebugEnabled);
-	ui->enableAuthenticationCheckBox->setChecked(conf->AuthRequired);
-	ui->serverPasswordLineEdit->setText(conf->ServerPassword);
-	ui->serverPasswordLineEdit->setEnabled(conf->AuthRequired);
-	ui->generatePasswordButton->setEnabled(conf->AuthRequired);
-	ui->serverPortSpinBox->setValue(conf->ServerPort);
-
-	if (conf->PortOverridden) {
+	if (conf->PortOverridden)
 		ui->serverPortSpinBox->setEnabled(false);
-	}
 
 	if (conf->PasswordOverridden) {
 		ui->enableAuthenticationCheckBox->setEnabled(false);
@@ -104,7 +89,7 @@ void SettingsDialog::showEvent(QShowEvent *)
 
 	passwordManuallyEdited = false;
 
-	FillSessionTable();
+	RefreshData();
 
 	sessionTableTimer->start(1000);
 }
@@ -123,6 +108,27 @@ void SettingsDialog::ToggleShowHide()
 		setVisible(true);
 	else
 		setVisible(false);
+}
+
+void SettingsDialog::RefreshData()
+{
+	auto conf = GetConfig();
+	if (!conf) {
+		blog(LOG_ERROR, "[SettingsDialog::RefreshData] Unable to retreive config!");
+		return;
+	}
+
+	ui->enableWebSocketServerCheckBox->setChecked(conf->ServerEnabled);
+	ui->enableSystemTrayAlertsCheckBox->setChecked(conf->AlertsEnabled);
+	ui->enableDebugLoggingCheckBox->setChecked(conf->DebugEnabled);
+	ui->serverPortSpinBox->setValue(conf->ServerPort);
+	ui->enableAuthenticationCheckBox->setChecked(conf->AuthRequired);
+	ui->serverPasswordLineEdit->setText(conf->ServerPassword);
+
+	ui->serverPasswordLineEdit->setEnabled(conf->AuthRequired);
+	ui->generatePasswordButton->setEnabled(conf->AuthRequired);
+
+	FillSessionTable();
 }
 
 void SettingsDialog::DialogButtonClicked(QAbstractButton *button)
@@ -162,28 +168,30 @@ void SettingsDialog::SaveFormData()
 		int ret = msgBox.exec();
 
 		switch (ret) {
-			case QMessageBox::Yes:
-				break;
-			case QMessageBox::No:
-			default:
-				ui->serverPasswordLineEdit->setText(conf->ServerPassword);
-				return;
+		case QMessageBox::Yes:
+			break;
+		case QMessageBox::No:
+		default:
+			ui->serverPasswordLineEdit->setText(conf->ServerPassword);
+			return;
 		}
 	}
 
-	bool needsRestart = (conf->ServerEnabled != ui->enableWebSocketServerCheckBox->isChecked()) ||
-						(ui->enableAuthenticationCheckBox->isChecked() && conf->ServerPassword != ui->serverPasswordLineEdit->text()) ||
-						(conf->ServerPort != ui->serverPortSpinBox->value());
+	bool needsRestart =
+		(conf->ServerEnabled != ui->enableWebSocketServerCheckBox->isChecked()) ||
+		(conf->ServerPort != ui->serverPortSpinBox->value()) ||
+		(ui->enableAuthenticationCheckBox->isChecked() && conf->ServerPassword != ui->serverPasswordLineEdit->text());
 
 	conf->ServerEnabled = ui->enableWebSocketServerCheckBox->isChecked();
 	conf->AlertsEnabled = ui->enableSystemTrayAlertsCheckBox->isChecked();
 	conf->DebugEnabled = ui->enableDebugLoggingCheckBox->isChecked();
+	conf->ServerPort = ui->serverPortSpinBox->value();
 	conf->AuthRequired = ui->enableAuthenticationCheckBox->isChecked();
 	conf->ServerPassword = ui->serverPasswordLineEdit->text();
-	conf->ServerPort = ui->serverPortSpinBox->value();
 
 	conf->Save();
 
+	RefreshData();
 	connectInfo->RefreshData();
 
 	if (needsRestart) {
@@ -226,7 +234,8 @@ void SettingsDialog::FillSessionTable()
 		QTableWidgetItem *durationItem = new QTableWidgetItem(QTime(0, 0, sessionDuration).toString("hh:mm:ss"));
 		ui->websocketSessionTable->setItem(i, 1, durationItem);
 
-		QTableWidgetItem *statsItem = new QTableWidgetItem(QString("%1/%2").arg(session.incomingMessages).arg(session.outgoingMessages));
+		QTableWidgetItem *statsItem =
+			new QTableWidgetItem(QString("%1/%2").arg(session.incomingMessages).arg(session.outgoingMessages));
 		ui->websocketSessionTable->setItem(i, 2, statsItem);
 
 		QLabel *identifiedLabel = new QLabel();
@@ -246,9 +255,7 @@ void SettingsDialog::FillSessionTable()
 		invalidateButtonLayout->setContentsMargins(0, 0, 0, 0);
 		invalidateButtonWidget->setLayout(invalidateButtonLayout);
 		ui->websocketSessionTable->setCellWidget(i, 4, invalidateButtonWidget);
-		connect(invalidateButton, &QPushButton::clicked, [=]() {
-			webSocketServer->InvalidateSession(session.hdl);
-		});
+		connect(invalidateButton, &QPushButton::clicked, [=]() { webSocketServer->InvalidateSession(session.hdl); });
 
 		i++;
 	}
@@ -285,11 +292,11 @@ void SettingsDialog::ShowConnectInfoButtonClicked()
 		int ret = msgBox.exec();
 
 		switch (ret) {
-			case QMessageBox::Yes:
-				break;
-			case QMessageBox::No:
-			default:
-				return;
+		case QMessageBox::Yes:
+			break;
+		case QMessageBox::No:
+		default:
+			return;
 		}
 	}
 

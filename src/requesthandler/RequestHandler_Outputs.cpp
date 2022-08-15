@@ -46,7 +46,7 @@ static bool ReplayBufferAvailable()
  * @category outputs
  * @api requests
  */
-RequestResult RequestHandler::GetVirtualCamStatus(const Request&)
+RequestResult RequestHandler::GetVirtualCamStatus(const Request &)
 {
 	if (!VirtualCamAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "VirtualCam is not available.");
@@ -68,7 +68,7 @@ RequestResult RequestHandler::GetVirtualCamStatus(const Request&)
  * @category outputs
  * @api requests
  */
-RequestResult RequestHandler::ToggleVirtualCam(const Request&)
+RequestResult RequestHandler::ToggleVirtualCam(const Request &)
 {
 	if (!VirtualCamAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "VirtualCam is not available.");
@@ -95,7 +95,7 @@ RequestResult RequestHandler::ToggleVirtualCam(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::StartVirtualCam(const Request&)
+RequestResult RequestHandler::StartVirtualCam(const Request &)
 {
 	if (!VirtualCamAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "VirtualCam is not available.");
@@ -118,7 +118,7 @@ RequestResult RequestHandler::StartVirtualCam(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::StopVirtualCam(const Request&)
+RequestResult RequestHandler::StopVirtualCam(const Request &)
 {
 	if (!VirtualCamAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "VirtualCam is not available.");
@@ -143,7 +143,7 @@ RequestResult RequestHandler::StopVirtualCam(const Request&)
  * @category outputs
  * @api requests
  */
-RequestResult RequestHandler::GetReplayBufferStatus(const Request&)
+RequestResult RequestHandler::GetReplayBufferStatus(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -165,7 +165,7 @@ RequestResult RequestHandler::GetReplayBufferStatus(const Request&)
  * @category outputs
  * @api requests
  */
-RequestResult RequestHandler::ToggleReplayBuffer(const Request&)
+RequestResult RequestHandler::ToggleReplayBuffer(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -192,7 +192,7 @@ RequestResult RequestHandler::ToggleReplayBuffer(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::StartReplayBuffer(const Request&)
+RequestResult RequestHandler::StartReplayBuffer(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -215,7 +215,7 @@ RequestResult RequestHandler::StartReplayBuffer(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::StopReplayBuffer(const Request&)
+RequestResult RequestHandler::StopReplayBuffer(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -238,7 +238,7 @@ RequestResult RequestHandler::StopReplayBuffer(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::SaveReplayBuffer(const Request&)
+RequestResult RequestHandler::SaveReplayBuffer(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -263,7 +263,7 @@ RequestResult RequestHandler::SaveReplayBuffer(const Request&)
  * @api requests
  * @category outputs
  */
-RequestResult RequestHandler::GetLastReplayBufferReplay(const Request&)
+RequestResult RequestHandler::GetLastReplayBufferReplay(const Request &)
 {
 	if (!ReplayBufferAvailable())
 		return RequestResult::Error(RequestStatus::InvalidResourceState, "Replay buffer is not available.");
@@ -272,6 +272,217 @@ RequestResult RequestHandler::GetLastReplayBufferReplay(const Request&)
 		return RequestResult::Error(RequestStatus::OutputNotRunning);
 
 	json responseData;
-	responseData["savedReplayPath"] = Utils::Obs::StringHelper::GetLastReplayBufferFilePath();
+	responseData["savedReplayPath"] = Utils::Obs::StringHelper::GetLastReplayBufferFileName();
 	return RequestResult::Success(responseData);
+}
+
+/**
+ * Gets the list of available outputs.
+ *
+ * @requestType GetOutputList
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::GetOutputList(const Request &)
+{
+	json responseData;
+	responseData["outputs"] = Utils::Obs::ArrayHelper::GetOutputList();
+	return RequestResult::Success(responseData);
+}
+
+/**
+ * Gets the status of an output.
+ *
+ * @requestField outputName | String | Output name
+ *
+ * @responseField outputActive        | Boolean | Whether the output is active
+ * @responseField outputReconnecting  | Boolean | Whether the output is reconnecting
+ * @responseField outputTimecode      | String  | Current formatted timecode string for the output
+ * @responseField outputDuration      | Number  | Current duration in milliseconds for the output
+ * @responseField outputCongestion    | Number  | Congestion of the output
+ * @responseField outputBytes         | Number  | Number of bytes sent by the output
+ * @responseField outputSkippedFrames | Number  | Number of frames skipped by the output's process
+ * @responseField outputTotalFrames   | Number  | Total number of frames delivered by the output's process
+ *
+ * @requestType GetOutputStatus
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::GetOutputStatus(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	uint64_t outputDuration = Utils::Obs::NumberHelper::GetOutputDuration(output);
+
+	json responseData;
+	responseData["outputActive"] = obs_output_active(output);
+	responseData["outputReconnecting"] = obs_output_reconnecting(output);
+	responseData["outputTimecode"] = Utils::Obs::StringHelper::DurationToTimecode(outputDuration);
+	responseData["outputDuration"] = outputDuration;
+	responseData["outputCongestion"] = obs_output_get_congestion(output);
+	responseData["outputBytes"] = obs_output_get_total_bytes(output);
+	responseData["outputSkippedFrames"] = obs_output_get_frames_dropped(output);
+	responseData["outputTotalFrames"] = obs_output_get_total_frames(output);
+
+	return RequestResult::Success(responseData);
+}
+
+/**
+ * Toggles the status of an output.
+ *
+ * @requestField outputName | String | Output name
+ *
+ * @responseField outputActive | Boolean | Whether the output is active
+ * 
+ * @requestType ToggleOutput
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::ToggleOutput(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	bool outputActive = obs_output_active(output);
+	if (outputActive)
+		obs_output_stop(output);
+	else
+		obs_output_start(output);
+
+	json responseData;
+	responseData["outputActive"] = !outputActive;
+	return RequestResult::Success(responseData);
+}
+
+/**
+ * Starts an output.
+ *
+ * @requestField outputName | String | Output name
+ *
+ * @requestType StartOutput
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::StartOutput(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	if (obs_output_active(output))
+		return RequestResult::Error(RequestStatus::OutputRunning);
+
+	obs_output_start(output);
+
+	return RequestResult::Success();
+}
+
+/**
+ * Stops an output.
+ *
+ * @requestField outputName | String | Output name
+ *
+ * @requestType StopOutput
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::StopOutput(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	if (!obs_output_active(output))
+		return RequestResult::Error(RequestStatus::OutputNotRunning);
+
+	obs_output_stop(output);
+
+	return RequestResult::Success();
+}
+
+/**
+ * Gets the settings of an output.
+ *
+ * @requestField outputName | String | Output name
+ *
+ * @responseField outputSettings | Object | Output settings
+ *
+ * @requestType GetOutputSettings
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::GetOutputSettings(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	OBSDataAutoRelease outputSettings = obs_output_get_settings(output);
+
+	json responseData;
+	responseData["outputSettings"] = Utils::Json::ObsDataToJson(outputSettings);
+	return RequestResult::Success(responseData);
+}
+
+/**
+ * Sets the settings of an output.
+ *
+ * @requestField outputName     | String | Output name
+ * @requestField outputSettings | Object | Output settings
+ *
+ * @requestType SetOutputSettings
+ * @complexity 4
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @api requests
+ * @category outputs
+ */
+RequestResult RequestHandler::SetOutputSettings(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = request.ValidateOutput("outputName", statusCode, comment);
+	if (!(output && request.ValidateObject("outputSettings", statusCode, comment, true)))
+		return RequestResult::Error(statusCode, comment);
+
+	OBSDataAutoRelease newSettings = Utils::Json::JsonToObsData(request.RequestData["outputSettings"]);
+	if (!newSettings)
+		// This should never happen
+		return RequestResult::Error(RequestStatus::RequestProcessingFailed,
+					    "An internal data conversion operation failed. Please report this!");
+
+	obs_output_update(output, newSettings);
+
+	return RequestResult::Success();
 }

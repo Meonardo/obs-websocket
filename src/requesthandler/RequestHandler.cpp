@@ -23,8 +23,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 #include "RequestHandler.h"
 
-const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_handlerMap
-{
+const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_handlerMap{
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},
 	{"GetStats", &RequestHandler::GetStats},
@@ -34,8 +33,6 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"TriggerHotkeyByName", &RequestHandler::TriggerHotkeyByName},
 	{"TriggerHotkeyByKeySequence", &RequestHandler::TriggerHotkeyByKeySequence},
 	{"Sleep", &RequestHandler::Sleep},
-	{"SetFilenameFormatting", &RequestHandler::SetFilenameFormatting},
-	{"GetFilenameFormatting", &RequestHandler::GetFilenameFormatting},
 
 	// Config
 	{"GetPersistentData", &RequestHandler::GetPersistentData},
@@ -53,13 +50,12 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"SetVideoSettings", &RequestHandler::SetVideoSettings},
 	{"GetStreamServiceSettings", &RequestHandler::GetStreamServiceSettings},
 	{"SetStreamServiceSettings", &RequestHandler::SetStreamServiceSettings},
+	{"GetRecordDirectory", &RequestHandler::GetRecordDirectory},
 
 	// Sources
 	{"GetSourceActive", &RequestHandler::GetSourceActive},
 	{"GetSourceScreenshot", &RequestHandler::GetSourceScreenshot},
 	{"SaveSourceScreenshot", &RequestHandler::SaveSourceScreenshot},
-	{"CreateSource", &RequestHandler::CreateSource},
-	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
 	{"GetSourcePrivateSettings", &RequestHandler::GetSourcePrivateSettings},
 	{"SetSourcePrivateSettings", &RequestHandler::SetSourcePrivateSettings},
 
@@ -139,9 +135,10 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"SetSceneItemLocked", &RequestHandler::SetSceneItemLocked},
 	{"GetSceneItemIndex", &RequestHandler::GetSceneItemIndex},
 	{"SetSceneItemIndex", &RequestHandler::SetSceneItemIndex},
-	{"SetSceneItemProperties", &RequestHandler::SetSceneItemProperties},
 	{"GetSceneItemBlendMode", &RequestHandler::GetSceneItemBlendMode},
 	{"SetSceneItemBlendMode", &RequestHandler::SetSceneItemBlendMode},
+	{"GetSceneItemPrivateSettings", &RequestHandler::GetSceneItemPrivateSettings},
+	{"SetSceneItemPrivateSettings", &RequestHandler::SetSceneItemPrivateSettings},
 
 	// Outputs
 	{"GetVirtualCamStatus", &RequestHandler::GetVirtualCamStatus},
@@ -154,6 +151,13 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"StopReplayBuffer", &RequestHandler::StopReplayBuffer},
 	{"SaveReplayBuffer", &RequestHandler::SaveReplayBuffer},
 	{"GetLastReplayBufferReplay", &RequestHandler::GetLastReplayBufferReplay},
+	{"GetOutputList", &RequestHandler::GetOutputList},
+	{"GetOutputStatus", &RequestHandler::GetOutputStatus},
+	{"ToggleOutput", &RequestHandler::ToggleOutput},
+	{"StartOutput", &RequestHandler::StartOutput},
+	{"StopOutput", &RequestHandler::StopOutput},
+	{"GetOutputSettings", &RequestHandler::GetOutputSettings},
+	{"SetOutputSettings", &RequestHandler::SetOutputSettings},
 
 	// Stream
 	{"GetStreamStatus", &RequestHandler::GetStreamStatus},
@@ -170,8 +174,6 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"ToggleRecordPause", &RequestHandler::ToggleRecordPause},
 	{"PauseRecord", &RequestHandler::PauseRecord},
 	{"ResumeRecord", &RequestHandler::ResumeRecord},
-	{"GetRecordDirectory", &RequestHandler::GetRecordDirectory},
-	{"SetRecordDirectory", &RequestHandler::SetRecordDirectory},
 
 	// Media Inputs
 	{"GetMediaInputStatus", &RequestHandler::GetMediaInputStatus},
@@ -185,15 +187,14 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"OpenInputPropertiesDialog", &RequestHandler::OpenInputPropertiesDialog},
 	{"OpenInputFiltersDialog", &RequestHandler::OpenInputFiltersDialog},
 	{"OpenInputInteractDialog", &RequestHandler::OpenInputInteractDialog},
-	{ "GetMonitorList", &RequestHandler::GetMonitorList },
+	{"GetMonitorList", &RequestHandler::GetMonitorList},
+	{"OpenVideoMixProjector", &RequestHandler::OpenVideoMixProjector},
+	{"OpenSourceProjector", &RequestHandler::OpenSourceProjector},
 };
 
-RequestHandler::RequestHandler(SessionPtr session) :
-	_session(session)
-{
-}
+RequestHandler::RequestHandler(SessionPtr session) : _session(session) {}
 
-RequestResult RequestHandler::ProcessRequest(const Request& request)
+RequestResult RequestHandler::ProcessRequest(const Request &request)
 {
 #ifdef PLUGIN_TESTS
 	ScopeProfiler prof{"obs_websocket_request_processing"};
@@ -203,12 +204,13 @@ RequestResult RequestHandler::ProcessRequest(const Request& request)
 		return RequestResult::Error(RequestStatus::InvalidRequestFieldType, "Your request data is not an object.");
 
 	if (request.RequestType.empty())
-		return RequestResult::Error(RequestStatus::MissingRequestType, "Your request is missing a `requestType`");
+		return RequestResult::Error(RequestStatus::MissingRequestType, "Your request's `requestType` may not be empty.");
 
 	RequestMethodHandler handler;
 	try {
 		handler = _handlerMap.at(request.RequestType);
-	} catch (const std::out_of_range& oor) {
+	} catch (const std::out_of_range &oor) {
+		UNUSED_PARAMETER(oor);
 		return RequestResult::Error(RequestStatus::UnknownRequestType, "Your request type is not valid.");
 	}
 
@@ -218,7 +220,7 @@ RequestResult RequestHandler::ProcessRequest(const Request& request)
 std::vector<std::string> RequestHandler::GetRequestList()
 {
 	std::vector<std::string> ret;
-	for (auto const& [key, val] : _handlerMap) {
+	for (auto const &[key, val] : _handlerMap) {
 		ret.push_back(key);
 	}
 

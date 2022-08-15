@@ -30,7 +30,7 @@ json Utils::Obs::ObjectHelper::GetStats()
 
 	std::string outputPath = Utils::Obs::StringHelper::GetCurrentRecordOutputPath();
 
-	video_t* video = obs_get_video();
+	video_t *video = obs_get_video();
 
 	ret["cpuUsage"] = os_cpu_usage_info_query(GetCpuUsageInfo());
 	ret["memoryUsage"] = (double)os_get_proc_resident_size() / (1024.0 * 1024.0);
@@ -55,8 +55,8 @@ json Utils::Obs::ObjectHelper::GetSceneItemTransform(obs_sceneitem_t *item)
 	obs_sceneitem_get_crop(item, &crop);
 
 	OBSSource source = obs_sceneitem_get_source(item);
-	float sourceWidth = float(obs_source_get_width(source));
-	float sourceHeight = float(obs_source_get_height(source));
+	float sourceWidth = (float)obs_source_get_width(source);
+	float sourceHeight = (float)obs_source_get_height(source);
 
 	ret["sourceWidth"] = sourceWidth;
 	ret["sourceHeight"] = sourceHeight;
@@ -74,15 +74,15 @@ json Utils::Obs::ObjectHelper::GetSceneItemTransform(obs_sceneitem_t *item)
 
 	ret["alignment"] = osi.alignment;
 
-	ret["boundsType"] = StringHelper::GetSceneItemBoundsType(osi.bounds_type);
+	ret["boundsType"] = osi.bounds_type;
 	ret["boundsAlignment"] = osi.bounds_alignment;
 	ret["boundsWidth"] = osi.bounds.x;
 	ret["boundsHeight"] = osi.bounds.y;
 
-	ret["cropLeft"] = int(crop.left);
-	ret["cropRight"] = int(crop.right);
-	ret["cropTop"] = int(crop.top);
-	ret["cropBottom"] = int(crop.bottom);
+	ret["cropLeft"] = (int)crop.left;
+	ret["cropRight"] = (int)crop.right;
+	ret["cropTop"] = (int)crop.top;
+	ret["cropBottom"] = (int)crop.bottom;
 
 	return ret;
 }

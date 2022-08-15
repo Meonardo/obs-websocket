@@ -111,7 +111,7 @@ void EventHandler::HandleInputNameChanged(obs_source_t *, std::string oldInputNa
  */
 void EventHandler::HandleInputActiveStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	if (!eventHandler->_inputActiveStateChangedRef.load())
 		return;
@@ -147,7 +147,7 @@ void EventHandler::HandleInputActiveStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputShowStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	if (!eventHandler->_inputShowStateChangedRef.load())
 		return;
@@ -181,7 +181,7 @@ void EventHandler::HandleInputShowStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputMuteStateChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -213,7 +213,7 @@ void EventHandler::HandleInputMuteStateChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -225,7 +225,7 @@ void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
 	// Volume must be grabbed from the calldata. Running obs_source_get_volume() will return the previous value.
 	double inputVolumeMul = calldata_float(data, "volume");
 
-	double inputVolumeDb = obs_mul_to_db(inputVolumeMul);
+	double inputVolumeDb = obs_mul_to_db((float)inputVolumeMul);
 	if (inputVolumeDb == -INFINITY)
 		inputVolumeDb = -100;
 
@@ -252,7 +252,7 @@ void EventHandler::HandleInputVolumeChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputAudioBalanceChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -285,7 +285,7 @@ void EventHandler::HandleInputAudioBalanceChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputAudioSyncOffsetChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -318,7 +318,7 @@ void EventHandler::HandleInputAudioSyncOffsetChanged(void *param, calldata_t *da
  */
 void EventHandler::HandleInputAudioTracksChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -344,6 +344,7 @@ void EventHandler::HandleInputAudioTracksChanged(void *param, calldata_t *data)
  * The monitor type of an input has changed.
  *
  * Available types are:
+ *
  * - `OBS_MONITORING_TYPE_NONE`
  * - `OBS_MONITORING_TYPE_MONITOR_ONLY`
  * - `OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT`
@@ -361,7 +362,7 @@ void EventHandler::HandleInputAudioTracksChanged(void *param, calldata_t *data)
  */
 void EventHandler::HandleInputAudioMonitorTypeChanged(void *param, calldata_t *data)
 {
-	auto eventHandler = static_cast<EventHandler*>(param);
+	auto eventHandler = static_cast<EventHandler *>(param);
 
 	obs_source_t *source = GetCalldataPointer<obs_source_t>(data, "source");
 	if (!source)
@@ -372,11 +373,9 @@ void EventHandler::HandleInputAudioMonitorTypeChanged(void *param, calldata_t *d
 
 	enum obs_monitoring_type monitorType = (obs_monitoring_type)calldata_int(data, "type");
 
-	std::string monitorTypeString = Utils::Obs::StringHelper::GetInputMonitorType(monitorType);
-
 	json eventData;
 	eventData["inputName"] = obs_source_get_name(source);
-	eventData["monitorType"] = monitorTypeString;
+	eventData["monitorType"] = monitorType;
 	eventHandler->BroadcastEvent(EventSubscription::Inputs, "InputAudioMonitorTypeChanged", eventData);
 }
 

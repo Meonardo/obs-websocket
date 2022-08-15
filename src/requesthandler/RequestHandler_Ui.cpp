@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
+
 #include <QGuiApplication>
 #include <QScreen>
 #include <QRect>
@@ -35,7 +36,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::GetStudioModeEnabled(const Request&)
+RequestResult RequestHandler::GetStudioModeEnabled(const Request &)
 {
 	json responseData;
 	responseData["studioModeEnabled"] = obs_frontend_preview_program_mode_active();
@@ -54,7 +55,7 @@ RequestResult RequestHandler::GetStudioModeEnabled(const Request&)
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::SetStudioModeEnabled(const Request& request)
+RequestResult RequestHandler::SetStudioModeEnabled(const Request &request)
 {
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;
@@ -66,10 +67,13 @@ RequestResult RequestHandler::SetStudioModeEnabled(const Request& request)
 		// (Bad) Create a boolean then pass it as a reference to the task. Requires `wait` in obs_queue_task() to be true, else undefined behavior
 		bool studioModeEnabled = request.RequestData["studioModeEnabled"];
 		// Queue the task inside of the UI thread to prevent race conditions
-		obs_queue_task(OBS_TASK_UI, [](void* param) {
-			auto studioModeEnabled = (bool*)param;
-			obs_frontend_set_preview_program_mode(*studioModeEnabled);
-		}, &studioModeEnabled, true);
+		obs_queue_task(
+			OBS_TASK_UI,
+			[](void *param) {
+				auto studioModeEnabled = (bool *)param;
+				obs_frontend_set_preview_program_mode(*studioModeEnabled);
+			},
+			&studioModeEnabled, true);
 	}
 
 	return RequestResult::Success();
@@ -87,7 +91,7 @@ RequestResult RequestHandler::SetStudioModeEnabled(const Request& request)
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::OpenInputPropertiesDialog(const Request& request)
+RequestResult RequestHandler::OpenInputPropertiesDialog(const Request &request)
 {
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;
@@ -112,7 +116,7 @@ RequestResult RequestHandler::OpenInputPropertiesDialog(const Request& request)
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::OpenInputFiltersDialog(const Request& request)
+RequestResult RequestHandler::OpenInputFiltersDialog(const Request &request)
 {
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;
@@ -137,7 +141,7 @@ RequestResult RequestHandler::OpenInputFiltersDialog(const Request& request)
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::OpenInputInteractDialog(const Request& request)
+RequestResult RequestHandler::OpenInputInteractDialog(const Request &request)
 {
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;
@@ -146,7 +150,8 @@ RequestResult RequestHandler::OpenInputInteractDialog(const Request& request)
 		return RequestResult::Error(statusCode, comment);
 
 	if (!(obs_source_get_output_flags(input) & OBS_SOURCE_INTERACTION))
-		return RequestResult::Error(RequestStatus::InvalidResourceState, "The specified input does not support interaction.");
+		return RequestResult::Error(RequestStatus::InvalidResourceState,
+					    "The specified input does not support interaction.");
 
 	obs_frontend_open_source_interaction(input);
 
@@ -165,18 +170,19 @@ RequestResult RequestHandler::OpenInputInteractDialog(const Request& request)
  * @category ui
  * @api requests
  */
-RequestResult RequestHandler::GetMonitorList(const Request&)
+RequestResult RequestHandler::GetMonitorList(const Request &)
 {
 	json responseData;
-	std::vector<json> monitorsData{};
-	QList<QScreen*> screensList = QGuiApplication::screens();
-	for (int screenIndex = 0; screenIndex < screensList.size(); screenIndex++)
-	{
-		json screenData = json::object();
-		QScreen const* screen = screensList[screenIndex];
-		
+	std::vector<json> monitorsData;
+	QList<QScreen *> screensList = QGuiApplication::screens();
+	for (int screenIndex = 0; screenIndex < screensList.size(); screenIndex++) {
+		json screenData;
+		QScreen const *screen = screensList[screenIndex];
+		std::stringstream nameAndIndex;
+		nameAndIndex << screen->name().toStdString();
+		nameAndIndex << '(' << screenIndex << ')';
+		screenData["monitorName"] = nameAndIndex.str();
 		screenData["monitorIndex"] = screenIndex;
-		screenData["monitorName"] = screen->name().toStdString();
 		const QRect screenGeometry = screen->geometry();
 		screenData["monitorWidth"] = screenGeometry.width();
 		screenData["monitorHeight"] = screenGeometry.height();
@@ -186,4 +192,113 @@ RequestResult RequestHandler::GetMonitorList(const Request&)
 	}
 	responseData["monitors"] = monitorsData;
 	return RequestResult::Success(responseData);
+}
+
+/**
+ * Opens a projector for a specific output video mix.
+ *
+ * Mix types:
+ *
+ * - `OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW`
+ * - `OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM`
+ * - `OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW`
+ *
+ * Note: This request serves to provide feature parity with 4.x. It is very likely to be changed/deprecated in a future release.
+ *
+ * @requestField videoMixType            | String | Type of mix to open
+ * @requestField ?monitorIndex      | Number | Monitor index, use `GetMonitorList` to obtain index | None | -1: Opens projector in windowed mode
+ * @requestField ?projectorGeometry | String | Size/Position data for a windowed projector, in Qt Base64 encoded format. Mutually exclusive with `monitorIndex` | N/A
+ *
+ * @requestType OpenVideoMixProjector
+ * @complexity 3
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @category ui
+ * @api requests
+ */
+RequestResult RequestHandler::OpenVideoMixProjector(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	if (!request.ValidateString("videoMixType", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+
+	std::string videoMixType = request.RequestData["videoMixType"];
+	const char *projectorType;
+	if (videoMixType == "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW")
+		projectorType = "Preview";
+	else if (videoMixType == "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM")
+		projectorType = "StudioProgram";
+	else if (videoMixType == "OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW")
+		projectorType = "Multiview";
+	else
+		return RequestResult::Error(RequestStatus::InvalidRequestField,
+					    "The field `videoMixType` has an invalid enum value.");
+
+	int monitorIndex = -1;
+	if (request.Contains("monitorIndex")) {
+		if (!request.ValidateOptionalNumber("monitorIndex", statusCode, comment, -1, 9))
+			return RequestResult::Error(statusCode, comment);
+		monitorIndex = request.RequestData["monitorIndex"];
+	}
+
+	std::string projectorGeometry;
+	if (request.Contains("projectorGeometry")) {
+		if (!request.ValidateOptionalString("projectorGeometry", statusCode, comment))
+			return RequestResult::Error(statusCode, comment);
+		if (monitorIndex != -1)
+			return RequestResult::Error(RequestStatus::TooManyRequestFields,
+						    "`monitorIndex` and `projectorGeometry` are mutually exclusive.");
+		projectorGeometry = request.RequestData["projectorGeometry"];
+	}
+
+	obs_frontend_open_projector(projectorType, monitorIndex, projectorGeometry.c_str(), nullptr);
+
+	return RequestResult::Success();
+}
+
+/**
+ * Opens a projector for a source.
+ *
+ * Note: This request serves to provide feature parity with 4.x. It is very likely to be changed/deprecated in a future release.
+ *
+ * @requestField sourceName         | String | Name of the source to open a projector for
+ * @requestField ?monitorIndex      | Number | Monitor index, use `GetMonitorList` to obtain index | None | -1: Opens projector in windowed mode
+ * @requestField ?projectorGeometry | String | Size/Position data for a windowed projector, in Qt Base64 encoded format. Mutually exclusive with `monitorIndex` | N/A
+ *
+ * @requestType OpenSourceProjector
+ * @complexity 3
+ * @rpcVersion -1
+ * @initialVersion 5.0.0
+ * @category ui
+ * @api requests
+ */
+RequestResult RequestHandler::OpenSourceProjector(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateSource("sourceName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	int monitorIndex = -1;
+	if (request.Contains("monitorIndex")) {
+		if (!request.ValidateOptionalNumber("monitorIndex", statusCode, comment, -1, 9))
+			return RequestResult::Error(statusCode, comment);
+		monitorIndex = request.RequestData["monitorIndex"];
+	}
+
+	std::string projectorGeometry;
+	if (request.Contains("projectorGeometry")) {
+		if (!request.ValidateOptionalString("projectorGeometry", statusCode, comment))
+			return RequestResult::Error(statusCode, comment);
+		if (monitorIndex != -1)
+			return RequestResult::Error(RequestStatus::TooManyRequestFields,
+						    "`monitorIndex` and `projectorGeometry` are mutually exclusive.");
+		projectorGeometry = request.RequestData["projectorGeometry"];
+	}
+
+	obs_frontend_open_projector("Source", monitorIndex, projectorGeometry.c_str(), obs_source_get_name(source));
+
+	return RequestResult::Success();
 }

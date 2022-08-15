@@ -26,6 +26,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  * @responseField outputReconnecting  | Boolean | Whether the output is currently reconnecting
  * @responseField outputTimecode      | String  | Current formatted timecode string for the output
  * @responseField outputDuration      | Number  | Current duration in milliseconds for the output
+ * @responseField outputCongestion    | Number  | Congestion of the output
  * @responseField outputBytes         | Number  | Number of bytes sent by the output
  * @responseField outputSkippedFrames | Number  | Number of frames skipped by the output's process
  * @responseField outputTotalFrames   | Number  | Total number of frames delivered by the output's process
@@ -37,7 +38,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  * @api requests
  * @category stream
  */
-RequestResult RequestHandler::GetStreamStatus(const Request&)
+RequestResult RequestHandler::GetStreamStatus(const Request &)
 {
 	OBSOutputAutoRelease streamOutput = obs_frontend_get_streaming_output();
 
@@ -48,6 +49,7 @@ RequestResult RequestHandler::GetStreamStatus(const Request&)
 	responseData["outputReconnecting"] = obs_output_reconnecting(streamOutput);
 	responseData["outputTimecode"] = Utils::Obs::StringHelper::DurationToTimecode(outputDuration);
 	responseData["outputDuration"] = outputDuration;
+	responseData["outputCongestion"] = obs_output_get_congestion(streamOutput);
 	responseData["outputBytes"] = (uint64_t)obs_output_get_total_bytes(streamOutput);
 	responseData["outputSkippedFrames"] = obs_output_get_frames_dropped(streamOutput);
 	responseData["outputTotalFrames"] = obs_output_get_total_frames(streamOutput);
@@ -67,7 +69,7 @@ RequestResult RequestHandler::GetStreamStatus(const Request&)
  * @api requests
  * @category stream
  */
-RequestResult RequestHandler::ToggleStream(const Request&)
+RequestResult RequestHandler::ToggleStream(const Request &)
 {
 	json responseData;
 	if (obs_frontend_streaming_active()) {
@@ -91,7 +93,7 @@ RequestResult RequestHandler::ToggleStream(const Request&)
  * @api requests
  * @category stream
  */
-RequestResult RequestHandler::StartStream(const Request&)
+RequestResult RequestHandler::StartStream(const Request &)
 {
 	if (obs_frontend_streaming_active())
 		return RequestResult::Error(RequestStatus::OutputRunning);
@@ -112,7 +114,7 @@ RequestResult RequestHandler::StartStream(const Request&)
  * @api requests
  * @category stream
  */
-RequestResult RequestHandler::StopStream(const Request&)
+RequestResult RequestHandler::StopStream(const Request &)
 {
 	if (!obs_frontend_streaming_active())
 		return RequestResult::Error(RequestStatus::OutputNotRunning);
@@ -135,7 +137,7 @@ RequestResult RequestHandler::StopStream(const Request&)
  * @category stream
  * @api requests
  */
-RequestResult RequestHandler::SendStreamCaption(const Request& request)
+RequestResult RequestHandler::SendStreamCaption(const Request &request)
 {
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;

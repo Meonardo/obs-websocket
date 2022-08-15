@@ -53,8 +53,13 @@ std::string Utils::Platform::GetLocalAddress()
 	std::vector<std::pair<QString, uint8_t>> preferredAddresses;
 	for (auto address : validAddresses) {
 		// Attribute a priority (0 is best) to the address to choose the best picks
-		if (address.startsWith("192.168.1.") || address.startsWith("192.168.0.")) { // Prefer common consumer router network prefixes
-			preferredAddresses.push_back(std::make_pair(address, 0));
+		if (address.startsWith("192.168.1.") ||
+		    address.startsWith("192.168.0.")) { // Prefer common consumer router network prefixes
+			if (address.startsWith("192.168.56."))
+				preferredAddresses.push_back(std::make_pair(address,
+									    255)); // Ignore virtualbox default
+			else
+				preferredAddresses.push_back(std::make_pair(address, 0));
 		} else if (address.startsWith("172.16.")) { // Slightly less common consumer router network prefixes
 			preferredAddresses.push_back(std::make_pair(address, 1));
 		} else if (address.startsWith("10.")) { // Even less common consumer router network prefixes
@@ -65,9 +70,8 @@ std::string Utils::Platform::GetLocalAddress()
 	}
 
 	// Sort by priority
-	std::sort(preferredAddresses.begin(), preferredAddresses.end(), [=](std::pair<QString, uint8_t> a, std::pair<QString, uint8_t> b) {
-		return a.second < b.second;
-	});
+	std::sort(preferredAddresses.begin(), preferredAddresses.end(),
+		  [=](std::pair<QString, uint8_t> a, std::pair<QString, uint8_t> b) { return a.second < b.second; });
 
 	// Return highest priority address
 	return preferredAddresses[0].first.toStdString();
@@ -109,14 +113,17 @@ void Utils::Platform::SendTrayNotification(QSystemTrayIcon::MessageIcon icon, QS
 
 	SystemTrayNotification *notification = new SystemTrayNotification{icon, title, body};
 
-	obs_queue_task(OBS_TASK_UI, [](void* param) {
-		void *systemTrayPtr = obs_frontend_get_system_tray();
-		auto systemTray = static_cast<QSystemTrayIcon*>(systemTrayPtr);
+	obs_queue_task(
+		OBS_TASK_UI,
+		[](void *param) {
+			void *systemTrayPtr = obs_frontend_get_system_tray();
+			auto systemTray = static_cast<QSystemTrayIcon *>(systemTrayPtr);
 
-		auto notification = static_cast<SystemTrayNotification*>(param);
-		systemTray->showMessage(notification->title, notification->body, notification->icon);
-		delete notification;
-	}, (void*)notification, false);
+			auto notification = static_cast<SystemTrayNotification *>(param);
+			systemTray->showMessage(notification->title, notification->body, notification->icon);
+			delete notification;
+		},
+		(void *)notification, false);
 }
 
 bool Utils::Platform::GetTextFileContent(std::string fileName, std::string &content)

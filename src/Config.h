@@ -30,7 +30,7 @@ struct Config {
 	void Load();
 	void Save();
 	void SetDefaultsToGlobalStore();
-	config_t* GetConfigStore();
+	config_t *GetConfigStore();
 
 	std::atomic<bool> PortOverridden;
 	std::atomic<bool> PasswordOverridden;
@@ -38,6 +38,7 @@ struct Config {
 	std::atomic<bool> FirstLoad;
 	std::atomic<bool> ServerEnabled;
 	std::atomic<uint16_t> ServerPort;
+	std::atomic<bool> Ipv4Only;
 	std::atomic<bool> DebugEnabled;
 	std::atomic<bool> AlertsEnabled;
 	std::atomic<bool> AuthRequired;

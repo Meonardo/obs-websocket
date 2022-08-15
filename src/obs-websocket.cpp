@@ -32,10 +32,16 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("obs-websocket", "en-US")
 OBS_MODULE_AUTHOR("OBSProject")
-const char *obs_module_name(void) { return "obs-websocket"; }
-const char *obs_module_description(void) { return obs_module_text("OBSWebSocket.Plugin.Description"); }
+const char *obs_module_name(void)
+{
+	return "obs-websocket";
+}
+const char *obs_module_description(void)
+{
+	return obs_module_text("OBSWebSocket.Plugin.Description");
+}
 
-os_cpu_usage_info_t* _cpuUsageInfo;
+os_cpu_usage_info_t *_cpuUsageInfo;
 ConfigPtr _config;
 EventHandlerPtr _eventHandler;
 WebSocketApiPtr _webSocketApi;
@@ -46,7 +52,8 @@ void WebSocketApiEventCallback(std::string vendorName, std::string eventType, ob
 
 bool obs_module_load(void)
 {
-	blog(LOG_INFO, "[obs_module_load] you can haz websockets (Version: %s | RPC Version: %d)", OBS_WEBSOCKET_VERSION, OBS_WEBSOCKET_RPC_VERSION);
+	blog(LOG_INFO, "[obs_module_load] you can haz websockets (Version: %s | RPC Version: %d)", OBS_WEBSOCKET_VERSION,
+	     OBS_WEBSOCKET_RPC_VERSION);
 	blog(LOG_INFO, "[obs_module_load] Qt version (compile-time): %s | Qt version (run-time): %s", QT_VERSION_STR, qVersion());
 	blog(LOG_INFO, "[obs_module_load] Linked ASIO Version: %d", ASIO_VERSION);
 
@@ -69,13 +76,13 @@ bool obs_module_load(void)
 
 	// Initialize the settings dialog
 	obs_frontend_push_ui_translation(obs_module_get_string);
-	QMainWindow* mainWindow = static_cast<QMainWindow*>(obs_frontend_get_main_window());
+	QMainWindow *mainWindow = static_cast<QMainWindow *>(obs_frontend_get_main_window());
 	_settingsDialog = new SettingsDialog(mainWindow);
 	obs_frontend_pop_ui_translation();
 
 	// Add the settings dialog to the tools menu
-	const char* menuActionText = obs_module_text("OBSWebSocket.Settings.DialogTitle");
-	QAction* menuAction = (QAction*)obs_frontend_add_tools_menu_qaction(menuActionText);
+	const char *menuActionText = obs_module_text("OBSWebSocket.Settings.DialogTitle");
+	QAction *menuAction = (QAction *)obs_frontend_add_tools_menu_qaction(menuActionText);
 	QObject::connect(menuAction, &QAction::triggered, [] { _settingsDialog->ToggleShowHide(); });
 
 	blog(LOG_INFO, "[obs_module_load] Module loaded.");
@@ -111,7 +118,7 @@ void obs_module_unload()
 	blog(LOG_INFO, "[obs_module_unload] Finished shutting down.");
 }
 
-os_cpu_usage_info_t* GetCpuUsageInfo()
+os_cpu_usage_info_t *GetCpuUsageInfo()
 {
 	return _cpuUsageInfo;
 }
@@ -190,12 +197,26 @@ void obs_module_post_load()
 {
 	blog(LOG_INFO, "[obs_module_post_load] Post load started.");
 
+	// Test plugin API version fetch
+	uint apiVersion = obs_websocket_get_api_version();
+	blog(LOG_INFO, "[obs_module_post_load] obs-websocket plugin API version: %u", apiVersion);
+
+	// Test calling obs-websocket requests
+	struct obs_websocket_request_response *response = obs_websocket_call_request("GetVersion");
+	if (response) {
+		blog(LOG_INFO, "[obs_module_post_load] Called GetVersion. Status Code: %u | Comment: %s | Response Data: %s",
+		     response->status_code, response->comment, response->response_data);
+		obs_websocket_request_response_free(response);
+	}
+
+	// Test vendor creation
 	auto vendor = obs_websocket_register_vendor("obs-websocket-test");
 	if (!vendor) {
 		blog(LOG_WARNING, "[obs_module_post_load] Failed to create vendor!");
 		return;
 	}
 
+	// Test vendor request registration
 	if (!obs_websocket_vendor_register_request(vendor, "TestRequest", test_vendor_request_cb, vendor)) {
 		blog(LOG_WARNING, "[obs_module_post_load] Failed to register vendor request!");
 		return;

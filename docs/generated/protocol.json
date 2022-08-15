@@ -105,7 +105,7 @@
           "rpcVersion": "1",
           "deprecated": false,
           "initialVersion": "5.0.0",
-          "enumValue": "(General | Config | Scenes | Inputs | Transitions | Filters | Outputs | SceneItems | MediaInputs | Vendors)"
+          "enumValue": "(General | Config | Scenes | Inputs | Transitions | Filters | Outputs | SceneItems | MediaInputs | Vendors | Ui)"
         },
         {
           "description": "Subscription value to receive the `InputVolumeMeters` high-volume event.",
@@ -1444,6 +1444,42 @@
       "responseFields": []
     },
     {
+      "description": "Sets the enable state of a source filter.",
+      "requestType": "SetSourceFilterEnabled",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "filters",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source the filter is on",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterName",
+          "valueType": "String",
+          "valueDescription": "Name of the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "filterEnabled",
+          "valueType": "Boolean",
+          "valueDescription": "New enable state of the filter",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
       "description": "Gets data about the current plugin and RPC version.",
       "requestType": "GetVersion",
       "complexity": 1,
@@ -1477,6 +1513,16 @@
           "valueName": "supportedImageFormats",
           "valueType": "Array<String>",
           "valueDescription": "Image formats available in `GetSourceScreenshot` and `SaveSourceScreenshot` requests."
+        },
+        {
+          "valueName": "platform",
+          "valueType": "String",
+          "valueDescription": "Name of the platform. Usually `windows`, `macos`, or `ubuntu` (linux flavor). Not guaranteed to be any of those"
+        },
+        {
+          "valueName": "platformDescription",
+          "valueType": "String",
+          "valueDescription": "Description of the platform, like `Windows 10 (10.0)`"
         }
       ]
     },
@@ -1602,6 +1648,16 @@
         }
       ],
       "responseFields": [
+        {
+          "valueName": "vendorName",
+          "valueType": "String",
+          "valueDescription": "Echoed of `vendorName`"
+        },
+        {
+          "valueName": "requestType",
+          "valueType": "String",
+          "valueDescription": "Echoed of `requestType`"
+        },
         {
           "valueName": "responseData",
           "valueType": "Object",
@@ -2283,7 +2339,7 @@
       "responseFields": []
     },
     {
-      "description": "Gets the audio monitor type of an input.\n\nThe available audio monitor types are:\n- `OBS_MONITORING_TYPE_NONE`\n- `OBS_MONITORING_TYPE_MONITOR_ONLY`\n- `OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT`",
+      "description": "Gets the audio monitor type of an input.\n\nThe available audio monitor types are:\n\n- `OBS_MONITORING_TYPE_NONE`\n- `OBS_MONITORING_TYPE_MONITOR_ONLY`\n- `OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT`",
       "requestType": "GetInputAudioMonitorType",
       "complexity": 2,
       "rpcVersion": "1",
@@ -2453,7 +2509,7 @@
       "responseFields": []
     },
     {
-      "description": "Gets the status of a media input.\n\nMedia States:\n- `OBS_MEDIA_STATE_NONE`\n- `OBS_MEDIA_STATE_PLAYING`\n- `OBS_MEDIA_STATE_OPENING`\n- `OBS_MEDIA_STATE_BUFFERING`\n- `OBS_MEDIA_STATE_PAUSED`\n- `OBS_MEDIA_STATE_STOPPED`\n- `OBS_MEDIA_STATE_ENDED`\n- `OBS_MEDIA_STATE_ERROR`",
+      "description": "Gets the status of a media input.\n\nMedia States:\n\n- `OBS_MEDIA_STATE_NONE`\n- `OBS_MEDIA_STATE_PLAYING`\n- `OBS_MEDIA_STATE_OPENING`\n- `OBS_MEDIA_STATE_BUFFERING`\n- `OBS_MEDIA_STATE_PAUSED`\n- `OBS_MEDIA_STATE_STOPPED`\n- `OBS_MEDIA_STATE_ENDED`\n- `OBS_MEDIA_STATE_ERROR`",
       "requestType": "GetMediaInputStatus",
       "complexity": 2,
       "rpcVersion": "1",
@@ -2713,6 +2769,198 @@
       ]
     },
     {
+      "description": "Gets the list of available outputs.",
+      "requestType": "GetOutputList",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the status of an output.",
+      "requestType": "GetOutputStatus",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        },
+        {
+          "valueName": "outputReconnecting",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is reconnecting"
+        },
+        {
+          "valueName": "outputTimecode",
+          "valueType": "String",
+          "valueDescription": "Current formatted timecode string for the output"
+        },
+        {
+          "valueName": "outputDuration",
+          "valueType": "Number",
+          "valueDescription": "Current duration in milliseconds for the output"
+        },
+        {
+          "valueName": "outputCongestion",
+          "valueType": "Number",
+          "valueDescription": "Congestion of the output"
+        },
+        {
+          "valueName": "outputBytes",
+          "valueType": "Number",
+          "valueDescription": "Number of bytes sent by the output"
+        },
+        {
+          "valueName": "outputSkippedFrames",
+          "valueType": "Number",
+          "valueDescription": "Number of frames skipped by the output's process"
+        },
+        {
+          "valueName": "outputTotalFrames",
+          "valueType": "Number",
+          "valueDescription": "Total number of frames delivered by the output's process"
+        }
+      ]
+    },
+    {
+      "description": "Toggles the status of an output.",
+      "requestType": "ToggleOutput",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "outputActive",
+          "valueType": "Boolean",
+          "valueDescription": "Whether the output is active"
+        }
+      ]
+    },
+    {
+      "description": "Starts an output.",
+      "requestType": "StartOutput",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Stops an output.",
+      "requestType": "StopOutput",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets the settings of an output.",
+      "requestType": "GetOutputSettings",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": [
+        {
+          "valueName": "outputSettings",
+          "valueType": "Object",
+          "valueDescription": "Output settings"
+        }
+      ]
+    },
+    {
+      "description": "Sets the settings of an output.",
+      "requestType": "SetOutputSettings",
+      "complexity": 4,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "outputs",
+      "requestFields": [
+        {
+          "valueName": "outputName",
+          "valueType": "String",
+          "valueDescription": "Output name",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "outputSettings",
+          "valueType": "Object",
+          "valueDescription": "Output settings",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
       "description": "Gets the status of the record output.",
       "requestType": "GetRecordStatus",
       "complexity": 2,
@@ -2780,7 +3028,13 @@
       "initialVersion": "5.0.0",
       "category": "record",
       "requestFields": [],
-      "responseFields": []
+      "responseFields": [
+        {
+          "valueName": "outputPath",
+          "valueType": "String",
+          "valueDescription": "File name for the saved recording"
+        }
+      ]
     },
     {
       "description": "Toggles pause on the record output.",
@@ -2843,7 +3097,7 @@
     },
     {
       "description": "Basically GetSceneItemList, but for groups.\n\nUsing groups at all in OBS is discouraged, as they are very broken under the hood.\n\nGroups only",
-      "requestType": "GetGroupItemList",
+      "requestType": "GetGroupSceneItemList",
       "complexity": 3,
       "rpcVersion": "1",
       "deprecated": false,
@@ -2891,6 +3145,14 @@
           "valueRestrictions": null,
           "valueOptional": false,
           "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "searchOffset",
+          "valueType": "Number",
+          "valueDescription": "Number of matches to skip during search. >= 0 means first forward. -1 means last (top) item",
+          "valueRestrictions": ">= -1",
+          "valueOptional": true,
+          "valueOptionalBehavior": "0"
         }
       ],
       "responseFields": [
@@ -3802,6 +4064,11 @@
           "valueDescription": "Current duration in milliseconds for the output"
         },
         {
+          "valueName": "outputCongestion",
+          "valueType": "Number",
+          "valueDescription": "Congestion of the output"
+        },
+        {
           "valueName": "outputBytes",
           "valueType": "Number",
           "valueDescription": "Number of bytes sent by the output"
@@ -4180,6 +4447,95 @@
           "valueRestrictions": null,
           "valueOptional": false,
           "valueOptionalBehavior": null
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Gets a list of connected monitors and information about them.",
+      "requestType": "GetMonitorList",
+      "complexity": 2,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "monitors",
+          "valueType": "Array<Object>",
+          "valueDescription": "a list of detected monitors with some information"
+        }
+      ]
+    },
+    {
+      "description": "Opens a projector for a specific output video mix.\n\nMix types:\n\n- `OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW`\n- `OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM`\n- `OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW`\n\nNote: This request serves to provide feature parity with 4.x. It is very likely to be changed/deprecated in a future release.",
+      "requestType": "OpenVideoMixProjector",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [
+        {
+          "valueName": "videoMixType",
+          "valueType": "String",
+          "valueDescription": "Type of mix to open",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "monitorIndex",
+          "valueType": "Number",
+          "valueDescription": "Monitor index, use `GetMonitorList` to obtain index",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "-1: Opens projector in windowed mode"
+        },
+        {
+          "valueName": "projectorGeometry",
+          "valueType": "String",
+          "valueDescription": "Size/Position data for a windowed projector, in Qt Base64 encoded format. Mutually exclusive with `monitorIndex`",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "N/A"
+        }
+      ],
+      "responseFields": []
+    },
+    {
+      "description": "Opens a projector for a source.\n\nNote: This request serves to provide feature parity with 4.x. It is very likely to be changed/deprecated in a future release.",
+      "requestType": "OpenSourceProjector",
+      "complexity": 3,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "ui",
+      "requestFields": [
+        {
+          "valueName": "sourceName",
+          "valueType": "String",
+          "valueDescription": "Name of the source to open a projector for",
+          "valueRestrictions": null,
+          "valueOptional": false,
+          "valueOptionalBehavior": null
+        },
+        {
+          "valueName": "monitorIndex",
+          "valueType": "Number",
+          "valueDescription": "Monitor index, use `GetMonitorList` to obtain index",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "-1: Opens projector in windowed mode"
+        },
+        {
+          "valueName": "projectorGeometry",
+          "valueType": "String",
+          "valueDescription": "Size/Position data for a windowed projector, in Qt Base64 encoded format. Mutually exclusive with `monitorIndex`",
+          "valueRestrictions": null,
+          "valueOptional": true,
+          "valueOptionalBehavior": "N/A"
         }
       ],
       "responseFields": []
@@ -4675,7 +5031,7 @@
       ]
     },
     {
-      "description": "The monitor type of an input has changed.\n\nAvailable types are:\n- `OBS_MONITORING_TYPE_NONE`\n- `OBS_MONITORING_TYPE_MONITOR_ONLY`\n- `OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT`",
+      "description": "The monitor type of an input has changed.\n\nAvailable types are:\n\n- `OBS_MONITORING_TYPE_NONE`\n- `OBS_MONITORING_TYPE_MONITOR_ONLY`\n- `OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT`",
       "eventType": "InputAudioMonitorTypeChanged",
       "eventSubscription": "Inputs",
       "complexity": 2,
@@ -4810,6 +5166,11 @@
           "valueName": "outputState",
           "valueType": "String",
           "valueDescription": "The specific state of the output"
+        },
+        {
+          "valueName": "outputPath",
+          "valueType": "String",
+          "valueDescription": "File name for the saved recording, if record stopped. `null` otherwise"
         }
       ]
     },
