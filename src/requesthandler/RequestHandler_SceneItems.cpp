@@ -684,14 +684,14 @@ RequestResult RequestHandler::SetSceneItemProperties(const Request& request)
 		vec2 newPosition = oldPosition;
 
 		if (obs_data_has_user_value(reqPosition, "x")) {
-			newPosition.x = obs_data_get_double(reqPosition, "x");
+			newPosition.x = (float)obs_data_get_double(reqPosition, "x");
 		}
 		if (obs_data_has_user_value(reqPosition, "y")) {
-			newPosition.y = obs_data_get_double(reqPosition, "y");
+			newPosition.y = (float)obs_data_get_double(reqPosition, "y");
 		}
 
 		if (obs_data_has_user_value(reqPosition, "alignment")) {
-			const uint32_t alignment = obs_data_get_int(reqPosition, "alignment");
+			const uint32_t alignment = (uint32_t)obs_data_get_int(reqPosition, "alignment");
 			obs_sceneitem_set_alignment(sceneItem, alignment);
 		}
 
@@ -732,10 +732,10 @@ RequestResult RequestHandler::SetSceneItemProperties(const Request& request)
 		vec2 newScale = oldScale;
 
 		if (obs_data_has_user_value(reqScale, "x")) {
-			newScale.x = obs_data_get_double(reqScale, "x");
+			newScale.x = (float)obs_data_get_double(reqScale, "x");
 		}
 		if (obs_data_has_user_value(reqScale, "y")) {
-			newScale.y = obs_data_get_double(reqScale, "y");
+			newScale.y = (float)obs_data_get_double(reqScale, "y");
 		}
 
 		obs_sceneitem_set_scale(sceneItem, &newScale);
@@ -749,16 +749,16 @@ RequestResult RequestHandler::SetSceneItemProperties(const Request& request)
 		obs_sceneitem_crop newCrop = oldCrop;
 
 		if (obs_data_has_user_value(reqCrop, "top")) {
-			newCrop.top = obs_data_get_int(reqCrop, "top");
+			newCrop.top = (int)obs_data_get_int(reqCrop, "top");
 		}
 		if (obs_data_has_user_value(reqCrop, "right")) {
-			newCrop.right = obs_data_get_int(reqCrop, "right");
+			newCrop.right = (int)obs_data_get_int(reqCrop, "right");
 		}
 		if (obs_data_has_user_value(reqCrop, "bottom")) {
-			newCrop.bottom = obs_data_get_int(reqCrop, "bottom");
+			newCrop.bottom = (int)obs_data_get_int(reqCrop, "bottom");
 		}
 		if (obs_data_has_user_value(reqCrop, "left")) {
-			newCrop.left = obs_data_get_int(reqCrop, "left");
+			newCrop.left = (int)obs_data_get_int(reqCrop, "left");
 		}
 
 		obs_sceneitem_set_crop(sceneItem, &newCrop);
@@ -811,16 +811,16 @@ RequestResult RequestHandler::SetSceneItemProperties(const Request& request)
 		vec2 newBounds = oldBounds;
 
 		if (obs_data_has_user_value(reqBounds, "x")) {
-			newBounds.x = obs_data_get_double(reqBounds, "x");
+			newBounds.x = (float)obs_data_get_double(reqBounds, "x");
 		}
 		if (obs_data_has_user_value(reqBounds, "y")) {
-			newBounds.y = obs_data_get_double(reqBounds, "y");
+			newBounds.y = (float)obs_data_get_double(reqBounds, "y");
 		}
 
 		obs_sceneitem_set_bounds(sceneItem, &newBounds);
 
 		if (obs_data_has_user_value(reqBounds, "alignment")) {
-			const uint32_t bounds_alignment = obs_data_get_int(reqBounds, "alignment");
+			const uint32_t bounds_alignment = (uint32_t)obs_data_get_int(reqBounds, "alignment");
 			obs_sceneitem_set_bounds_alignment(sceneItem, bounds_alignment);
 		}
 

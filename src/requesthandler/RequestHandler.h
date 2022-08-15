@@ -43,6 +43,13 @@ public:
 	std::vector<std::string> GetRequestList();
 
 private:
+	// Lost
+	RequestResult SetRecordDirectory(const Request &request);
+	RequestResult GetFilenameFormatting(const Request &request);
+	RequestResult SetFilenameFormatting(const Request &request);
+	RequestResult SetSceneItemProperties(const Request &request);
+	RequestResult GetSourceTypesList(const Request &request);
+
 	// General
 	RequestResult GetVersion(const Request &);
 	RequestResult GetStats(const Request &);

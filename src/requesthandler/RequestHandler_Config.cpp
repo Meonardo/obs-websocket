@@ -635,3 +635,33 @@ RequestResult RequestHandler::GetRecordDirectory(const Request &)
 
 	return RequestResult::Success(responseData);
 }
+
+/**
+ * In the current profile, sets the recording folder of the Simple and Advanced
+ * output modes to the specified value.
+ *
+ * Note: If `SetRecordingDirectory` is called while a recording is
+ * in progress, the change won't be applied immediately and will be
+ * effective on the next recording.
+ *
+ * @param {String} `rec-folder` Path of the recording folder.
+ *
+ * @api requests
+ * @name SetRecordingFolder
+ * @category recording
+ * @since 4.1.0
+ */
+RequestResult RequestHandler::SetRecordDirectory(const Request &request)
+{
+	if (!request.Contains("rec-folder")) {
+		return RequestResult::Error(RequestStatus::InvalidRequestField, "rec-folder parameter missing");
+	}
+
+	std::string newRecFolder = request.RequestData["rec-folder"];
+	bool success = Utils::Obs::SetCurrentRecordingFolder(newRecFolder.c_str());
+	if (!success) {
+		return RequestResult::Error(RequestStatus::InvalidRequestField, "invalid request parameters");
+	}
+
+	return RequestResult::Success();
+}
