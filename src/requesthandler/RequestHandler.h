@@ -44,11 +44,11 @@ public:
 
 private:
 	// Lost
-	RequestResult SetRecordDirectory(const Request &request);
-	RequestResult GetFilenameFormatting(const Request &request);
-	RequestResult SetFilenameFormatting(const Request &request);
-	RequestResult SetSceneItemProperties(const Request &request);
-	RequestResult GetSourceTypesList(const Request &request);
+	RequestResult SetRecordDirectory(const Request&);
+	RequestResult GetFilenameFormatting(const Request&);
+	RequestResult SetFilenameFormatting(const Request&);
+	RequestResult SetSceneItemProperties(const Request&);
+	RequestResult GetSourceTypesList(const Request&);
 
 	// General
 	RequestResult GetVersion(const Request &);

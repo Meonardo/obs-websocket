@@ -24,6 +24,13 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include "RequestHandler.h"
 
 const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_handlerMap{
+	// Lost
+	{"SetRecordDirectory", &RequestHandler::SetRecordDirectory},
+	{"GetFilenameFormatting", &RequestHandler::GetFilenameFormatting},
+	{"SetFilenameFormatting", &RequestHandler::SetFilenameFormatting},
+	{"SetSceneItemProperties", &RequestHandler::SetSceneItemProperties},
+	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
+	
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},
 	{"GetStats", &RequestHandler::GetStats},
