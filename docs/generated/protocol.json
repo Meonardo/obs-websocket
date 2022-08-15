@@ -3070,6 +3070,23 @@
       "responseFields": []
     },
     {
+      "description": "Gets the current directory that the record output is set to.",
+      "requestType": "GetRecordDirectory",
+      "complexity": 1,
+      "rpcVersion": "1",
+      "deprecated": false,
+      "initialVersion": "5.0.0",
+      "category": "record",
+      "requestFields": [],
+      "responseFields": [
+        {
+          "valueName": "recordDirectory",
+          "valueType": "String",
+          "valueDescription": "Output directory"
+        }
+      ]
+    },
+    {
       "description": "Gets a list of all scene items in a scene.\n\nScenes only",
       "requestType": "GetSceneItemList",
       "complexity": 3,
