@@ -2404,7 +2404,6 @@ Studio mode has been enabled or disabled.
   - [ToggleRecordPause](#togglerecordpause)
   - [PauseRecord](#pauserecord)
   - [ResumeRecord](#resumerecord)
-  - [GetRecordDirectory](#getrecorddirectory)
 - [Media Inputs Requests](#media-inputs-1-requests)
   - [GetMediaInputStatus](#getmediainputstatus)
   - [SetMediaInputCursor](#setmediainputcursor)
@@ -4787,22 +4786,6 @@ Resumes the record output.
 - Complexity Rating: `1/5`
 - Latest Supported RPC Version: `1`
 - Added in v5.0.0
-
----
-
-### GetRecordDirectory
-
-Gets the current directory that the record output is set to.
-
-- Complexity Rating: `1/5`
-- Latest Supported RPC Version: `1`
-- Added in v5.0.0
-
-**Response Fields:**
-
-| Name | Type  | Description |
-| ---- | :---: | ----------- |
-| recordDirectory | String | Output directory |
 
 ## Media Inputs Requests
 
