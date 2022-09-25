@@ -57,6 +57,18 @@ void EventHandler::HandleStreamStateChanged(ObsOutputState state)
 	BroadcastEvent(EventSubscription::Outputs, "StreamStateChanged", eventData);
 }
 
+void EventHandler::HandleStreamServiceAddressUpdated()
+{
+	json eventData;
+
+	OBSService service = obs_frontend_get_streaming_service();
+	eventData["streamServiceType"] = obs_service_get_type(service);
+	OBSDataAutoRelease serviceSettings = obs_service_get_settings(service);
+	eventData["streamServiceSettings"] = Utils::Json::ObsDataToJson(serviceSettings, true);
+
+	BroadcastEvent(EventSubscription::Outputs, "StreamServiceAddressUpdated", eventData);
+}
+
 /**
  * The state of the record output has changed.
  *

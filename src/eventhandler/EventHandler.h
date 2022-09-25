@@ -143,6 +143,7 @@ private:
 
 	// Outputs
 	void HandleStreamStateChanged(ObsOutputState state);
+	void HandleStreamServiceAddressUpdated();
 	void HandleRecordStateChanged(ObsOutputState state);
 	void HandleReplayBufferStateChanged(ObsOutputState state);
 	void HandleVirtualcamStateChanged(ObsOutputState state);

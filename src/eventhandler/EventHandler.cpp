@@ -431,6 +431,9 @@ void EventHandler::OnFrontendEvent(enum obs_frontend_event event, void *private_
 	case OBS_FRONTEND_EVENT_STREAMING_STARTED:
 		eventHandler->HandleStreamStateChanged(OBS_WEBSOCKET_OUTPUT_STARTED);
 		break;
+	case OBS_FRONTEND_EVENT_STREAMING_SERVICE_ADDED:
+		eventHandler->HandleStreamServiceAddressUpdated();
+		break;
 	case OBS_FRONTEND_EVENT_STREAMING_STOPPING:
 		eventHandler->HandleStreamStateChanged(OBS_WEBSOCKET_OUTPUT_STOPPING);
 		break;
