@@ -462,6 +462,54 @@ RequestResult RequestHandler::ToggleInputMute(const Request &request)
 	return RequestResult::Success(responseData);
 }
 
+RequestResult RequestHandler::MuteAllInputs(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateScene("sceneName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	json responseData;
+
+	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
+		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
+		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT)
+			obs_source_set_muted(itemSource, true);
+
+		return true;
+	};
+
+	obs_scene_t *scene = obs_scene_from_source(source);
+	obs_scene_enum_items(scene, cb, nullptr);
+
+	return RequestResult::Success(responseData);
+}
+
+RequestResult RequestHandler::UnmuteAllInputs(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateScene("sceneName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	json responseData;
+
+	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
+		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
+		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT)
+			obs_source_set_muted(itemSource, false);
+
+		return true;
+	};
+
+	obs_scene_t *scene = obs_scene_from_source(source);
+	obs_scene_enum_items(scene, cb, nullptr);
+
+	return RequestResult::Success(responseData);
+}
+
 /**
  * Gets the current volume setting of an input.
  *

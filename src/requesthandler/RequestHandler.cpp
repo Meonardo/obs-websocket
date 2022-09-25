@@ -30,6 +30,8 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"SetFilenameFormatting", &RequestHandler::SetFilenameFormatting},
 	{"SetSceneItemProperties", &RequestHandler::SetSceneItemProperties},
 	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
+	{"MuteAllInputs", &RequestHandler::MuteAllInputs},
+	{"UnmuteAllInputs", &RequestHandler::UnmuteAllInputs},
 	
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},

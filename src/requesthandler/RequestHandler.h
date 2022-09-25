@@ -49,6 +49,8 @@ private:
 	RequestResult SetFilenameFormatting(const Request&);
 	RequestResult SetSceneItemProperties(const Request&);
 	RequestResult GetSourceTypesList(const Request&);
+	RequestResult MuteAllInputs(const Request &);
+	RequestResult UnmuteAllInputs(const Request &);
 
 	// General
 	RequestResult GetVersion(const Request &);
