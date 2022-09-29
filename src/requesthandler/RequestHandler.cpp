@@ -32,6 +32,7 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"GetSourceTypesList", &RequestHandler::GetSourceTypesList},
 	{"MuteAllInputs", &RequestHandler::MuteAllInputs},
 	{"UnmuteAllInputs", &RequestHandler::UnmuteAllInputs},
+	{"ToggleAudioMixer", &RequestHandler::ToggleAudioMixer},
 	
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},

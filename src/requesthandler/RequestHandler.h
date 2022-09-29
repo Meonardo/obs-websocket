@@ -51,6 +51,7 @@ private:
 	RequestResult GetSourceTypesList(const Request&);
 	RequestResult MuteAllInputs(const Request &);
 	RequestResult UnmuteAllInputs(const Request &);
+	RequestResult ToggleAudioMixer(const Request &);
 
 	// General
 	RequestResult GetVersion(const Request &);

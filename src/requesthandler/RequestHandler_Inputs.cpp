@@ -510,6 +510,45 @@ RequestResult RequestHandler::UnmuteAllInputs(const Request &request)
 	return RequestResult::Success(responseData);
 }
 
+RequestResult RequestHandler::ToggleAudioMixer(const Request &request) {
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateScene("sceneName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	if (!request.ValidateBoolean("mixerEnabled", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	bool mixerEnabled = request.RequestData["mixerEnabled"];
+
+	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
+		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
+		bool* filterEnabled = reinterpret_cast<bool *>(param);
+		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT) {
+			const char* kind = obs_source_get_id(itemSource);
+			if (strcmp(kind, "wasapi_output_capture") == 0) {
+				const char *filterName = "Audio Monitor";
+				OBSSourceAutoRelease filter = obs_source_get_filter_by_name(itemSource, filterName);
+				if (filter != nullptr) {
+					obs_source_set_enabled(filter, *filterEnabled);
+					obs_source_set_muted(itemSource, !*filterEnabled);
+				}
+			}
+		}
+
+		return true;
+	};
+
+	json responseData;
+	obs_scene_t *scene = obs_scene_from_source(source);
+	obs_scene_enum_items(scene, cb, &mixerEnabled);
+
+	return RequestResult::Success(responseData);
+
+}
+
 /**
  * Gets the current volume setting of an input.
  *
