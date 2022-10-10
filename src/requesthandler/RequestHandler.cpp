@@ -33,6 +33,7 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"MuteAllInputs", &RequestHandler::MuteAllInputs},
 	{"UnmuteAllInputs", &RequestHandler::UnmuteAllInputs},
 	{"ToggleAudioMixer", &RequestHandler::ToggleAudioMixer},
+	{"ToggleMainWindowHide", &RequestHandler::ToggleMainWindowHide},
 	
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},

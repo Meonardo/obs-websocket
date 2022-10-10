@@ -510,7 +510,8 @@ RequestResult RequestHandler::UnmuteAllInputs(const Request &request)
 	return RequestResult::Success(responseData);
 }
 
-RequestResult RequestHandler::ToggleAudioMixer(const Request &request) {
+RequestResult RequestHandler::ToggleAudioMixer(const Request &request)
+{
 	RequestStatus::RequestStatus statusCode;
 	std::string comment;
 	OBSSourceAutoRelease source = request.ValidateScene("sceneName", statusCode, comment);
@@ -525,9 +526,9 @@ RequestResult RequestHandler::ToggleAudioMixer(const Request &request) {
 
 	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
 		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
-		bool* filterEnabled = reinterpret_cast<bool *>(param);
+		bool *filterEnabled = reinterpret_cast<bool *>(param);
 		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT) {
-			const char* kind = obs_source_get_id(itemSource);
+			const char *kind = obs_source_get_id(itemSource);
 			if (strcmp(kind, "wasapi_output_capture") == 0) {
 				const char *filterName = "Audio Monitor";
 				OBSSourceAutoRelease filter = obs_source_get_filter_by_name(itemSource, filterName);
@@ -546,7 +547,21 @@ RequestResult RequestHandler::ToggleAudioMixer(const Request &request) {
 	obs_scene_enum_items(scene, cb, &mixerEnabled);
 
 	return RequestResult::Success(responseData);
+}
 
+RequestResult RequestHandler::ToggleMainWindowHide(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	if (!request.ValidateBoolean("hidden", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+
+	bool hide = request.RequestData["hidden"];
+	obs_frontend_toggle_main_window_hidden(hide);
+
+	json responseData;
+	return RequestResult::Success(responseData);
 }
 
 /**
