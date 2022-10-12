@@ -85,9 +85,9 @@ void EventHandler::HandleSceneItemRemoved(void *param, calldata_t *data)
 		return;
 
 	json eventData;
-	eventData["sceneName"] = obs_source_get_name(obs_scene_get_source(scene));
+	/*eventData["sceneName"] = obs_source_get_name(obs_scene_get_source(scene));
 	eventData["sourceName"] = obs_source_get_name(obs_sceneitem_get_source(sceneItem));
-	eventData["sceneItemId"] = obs_sceneitem_get_id(sceneItem);
+	eventData["sceneItemId"] = obs_sceneitem_get_id(sceneItem);*/
 	eventHandler->BroadcastEvent(EventSubscription::SceneItems, "SceneItemRemoved", eventData);
 }
 
