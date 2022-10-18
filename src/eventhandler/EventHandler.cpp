@@ -311,6 +311,9 @@ void EventHandler::OnFrontendEvent(enum obs_frontend_event event, void *private_
 			eventHandler->_obsLoadedCallback();
 
 		break;
+	case OBS_FRONTEND_EVENT_MAIN_WINDOW_CLICK_HIDE:
+		eventHandler->HandleMainWindowClickHide();
+		break;
 	case OBS_FRONTEND_EVENT_EXIT:
 		eventHandler->HandleExitStarted();
 

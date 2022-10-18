@@ -79,6 +79,7 @@ private:
 	// General
 	void HandleExitStarted();
 	void HandleStudioModeStateChanged(bool enabled);
+	void HandleMainWindowClickHide();
 
 	// Config
 	void HandleCurrentSceneCollectionChanging();

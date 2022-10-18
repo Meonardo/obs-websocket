@@ -34,3 +34,8 @@ void EventHandler::HandleExitStarted()
 {
 	BroadcastEvent(EventSubscription::General, "ExitStarted");
 }
+
+void EventHandler::HandleMainWindowClickHide()
+{
+	BroadcastEvent(EventSubscription::General, "MainWindowDidClickHide");
+}
