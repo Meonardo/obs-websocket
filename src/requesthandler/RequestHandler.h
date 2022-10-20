@@ -53,6 +53,7 @@ private:
 	RequestResult UnmuteAllInputs(const Request &);
 	RequestResult ToggleAudioMixer(const Request &);
 	RequestResult ToggleMainWindowHide(const Request&);
+	RequestResult SaveProject(const Request &);
 
 	// General
 	RequestResult GetVersion(const Request &);

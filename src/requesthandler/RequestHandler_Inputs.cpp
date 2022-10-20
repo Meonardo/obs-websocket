@@ -564,6 +564,14 @@ RequestResult RequestHandler::ToggleMainWindowHide(const Request &request)
 	return RequestResult::Success(responseData);
 }
 
+RequestResult RequestHandler::SaveProject(const Request &request)
+{
+	obs_frontend_save();
+
+	json responseData;
+	return RequestResult::Success(responseData);
+}
+
 /**
  * Gets the current volume setting of an input.
  *
