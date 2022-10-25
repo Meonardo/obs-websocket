@@ -18,7 +18,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include "EventHandler.h"
-
+#include <QString>
 /**
  * An input has been created.
  *
@@ -41,6 +41,10 @@ void EventHandler::HandleInputCreated(obs_source_t *source)
 	std::string inputKind = obs_source_get_id(source);
 	OBSDataAutoRelease inputSettings = obs_source_get_settings(source);
 	OBSDataAutoRelease defaultInputSettings = obs_get_source_defaults(inputKind.c_str());
+
+	QString s = obs_source_get_name(source);
+	if (s.contains("(tmp)"))
+		return;
 
 	json eventData;
 	eventData["inputName"] = obs_source_get_name(source);
@@ -67,7 +71,11 @@ void EventHandler::HandleInputCreated(obs_source_t *source)
 void EventHandler::HandleInputRemoved(obs_source_t *source)
 {
 	json eventData;
+	QString s = obs_source_get_name(source);
+	if (s.contains("(tmp)"))
+		return;
 	eventData["inputName"] = obs_source_get_name(source);
+	eventData["inputKind"] = obs_source_get_id(source);
 	BroadcastEvent(EventSubscription::Inputs, "InputRemoved", eventData);
 }
 
