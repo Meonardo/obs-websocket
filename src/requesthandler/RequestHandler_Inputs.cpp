@@ -494,20 +494,62 @@ RequestResult RequestHandler::UnmuteAllInputs(const Request &request)
 	if (!source)
 		return RequestResult::Error(statusCode, comment);
 
-	json responseData;
+	if (!request.ValidateBoolean("interactionMode", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+	bool interactionMode = request.RequestData["interactionMode"];
+
+	if (!request.ValidateString("microphone", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+	std::string microphone = request.RequestData["microphone"];
 
 	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
+		auto list = static_cast<std::list<void *> *>(param);
+		if (list->empty())
+			return false;
+
+		std::string *microphone = static_cast<std::string *>(list->front());
+		bool *interactionMode = static_cast<bool *>(list->back());
+
 		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
-		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT)
-			obs_source_set_muted(itemSource, false);
+		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT) {
+			if (*interactionMode) {
+				std::string name = obs_source_get_name(itemSource);
+				if (name == *microphone) {
+					obs_source_set_muted(itemSource, false);
+				}
+			} else {
+				obs_source_set_muted(itemSource, false);
+			}
+		}
 
 		return true;
 	};
 
+	std::list<void *> list = {&microphone, &interactionMode};
 	obs_scene_t *scene = obs_scene_from_source(source);
-	obs_scene_enum_items(scene, cb, nullptr);
+	obs_scene_enum_items(scene, cb, &list);
 
+	json responseData;
 	return RequestResult::Success(responseData);
+}
+
+void RequestHandler::ToggleInputsMute(bool mute, obs_source_t *source)
+{
+	auto cb = [](obs_scene_t *, obs_sceneitem_t *sceneItem, void *param) {
+		OBSSource itemSource = obs_sceneitem_get_source(sceneItem);
+		if (obs_source_get_type(itemSource) == OBS_SOURCE_TYPE_INPUT) {
+			auto mute_ptr = static_cast<bool *>(param);
+			if (mute_ptr != nullptr) {
+				obs_source_set_muted(itemSource, *mute_ptr);
+			}
+		}
+		return true;
+	};
+
+	obs_scene_t *scene = obs_scene_from_source(source);
+	obs_scene_enum_items(scene, cb, &mute);
 }
 
 RequestResult RequestHandler::ToggleAudioMixer(const Request &request)
@@ -572,6 +614,49 @@ RequestResult RequestHandler::SaveProject(const Request &request)
 	return RequestResult::Success(responseData);
 }
 
+RequestResult RequestHandler::ToggleInteractionMode(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSSourceAutoRelease source = request.ValidateScene("sceneName", statusCode, comment);
+	if (!source)
+		return RequestResult::Error(statusCode, comment);
+
+	if (!request.ValidateString("inputName", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+	std::string inputName = request.RequestData["inputName"];
+
+	if (!request.ValidateBoolean("active", statusCode, comment)) {
+		return RequestResult::Error(statusCode, comment);
+	}
+	bool active = request.RequestData["active"];
+
+	// Interaction mode: create or active specific microphone input,
+	// and disable all the inputs but the name input just specific
+	ToggleInputsMute(active, source);
+
+	OBSSourceAutoRelease existingInput = obs_get_source_by_name(inputName.c_str());
+	if (existingInput) {
+		// mute/unmute the target accordingly
+		if (active) {
+			obs_source_set_muted(existingInput, false);
+		}
+	} else {
+		// create the input
+		OBSScene scene = obs_scene_from_source(source);
+		// Create the input and add it as a scene item to the destination scene
+		OBSSceneItemAutoRelease sceneItem =
+			Utils::Obs::ActionHelper::CreateInput(inputName, "wasapi_input_capture", NULL, scene, true);
+
+		if (!sceneItem)
+			return RequestResult::Error(RequestStatus::ResourceCreationFailed,
+						    "Creation of the input or scene item failed.");
+	}
+
+	json responseData;
+	return RequestResult::Success(responseData);
+}
 /**
  * Gets the current volume setting of an input.
  *

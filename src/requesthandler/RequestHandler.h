@@ -43,6 +43,7 @@ public:
 	std::vector<std::string> GetRequestList();
 
 private:
+	void ToggleInputsMute(bool mute, obs_source_t *source);
 	// Lost
 	RequestResult SetRecordDirectory(const Request&);
 	RequestResult GetFilenameFormatting(const Request&);
@@ -54,6 +55,7 @@ private:
 	RequestResult ToggleAudioMixer(const Request &);
 	RequestResult ToggleMainWindowHide(const Request&);
 	RequestResult SaveProject(const Request &);
+	RequestResult ToggleInteractionMode(const Request &);
 
 	// General
 	RequestResult GetVersion(const Request &);

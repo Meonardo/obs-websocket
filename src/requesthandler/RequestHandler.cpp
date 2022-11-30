@@ -35,6 +35,7 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"ToggleAudioMixer", &RequestHandler::ToggleAudioMixer},
 	{"ToggleMainWindowHide", &RequestHandler::ToggleMainWindowHide},
 	{"SaveProject", &RequestHandler::SaveProject},
+	{"ToggleInteractionMode", &RequestHandler::ToggleInteractionMode},
 	
 	// General
 	{"GetVersion", &RequestHandler::GetVersion},
