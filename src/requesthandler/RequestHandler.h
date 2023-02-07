@@ -44,7 +44,7 @@ public:
 
 private:
 	void ToggleInputsMute(bool mute, obs_source_t *source);
-	// Lost
+	// Lost + Extra
 	RequestResult SetRecordDirectory(const Request&);
 	RequestResult GetFilenameFormatting(const Request&);
 	RequestResult SetFilenameFormatting(const Request&);
@@ -56,6 +56,10 @@ private:
 	RequestResult ToggleMainWindowHide(const Request&);
 	RequestResult SaveProject(const Request &);
 	RequestResult ToggleInteractionMode(const Request &);
+	// janus output
+	RequestResult StartJanusOutput(const Request &);
+	RequestResult StopJanusOutput(const Request &);
+	RequestResult GetJanusOutputStatus(const Request &);
 
 	// General
 	RequestResult GetVersion(const Request &);

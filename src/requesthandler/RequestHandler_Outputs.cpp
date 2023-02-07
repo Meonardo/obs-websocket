@@ -486,3 +486,64 @@ RequestResult RequestHandler::SetOutputSettings(const Request &request)
 
 	return RequestResult::Success();
 }
+
+RequestResult RequestHandler::StartJanusOutput(const Request &request)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = obs_get_output_by_name("janus_output");
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	// configs
+	if (!request.ValidateString("url", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+	if (!request.ValidateString("display", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+	if (!request.ValidateNumber("room", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+	if (!request.ValidateNumber("id", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+	if (!request.ValidateString("pin", statusCode, comment))
+		return RequestResult::Error(statusCode, comment);
+
+	OBSDataAutoRelease settings = obs_data_create();
+	std::string url = request.RequestData["url"];
+	obs_data_set_string(settings, "url", url.c_str());
+	std::string display = request.RequestData["display"];
+	obs_data_set_string(settings, "display", display.c_str());
+	int room = request.RequestData["room"];
+	obs_data_set_int(settings, "room", room);
+	int id = request.RequestData["id"];
+	obs_data_set_int(settings, "id", id);
+	std::string pin = request.RequestData["pin"];
+	obs_data_set_string(settings, "pin", pin.c_str());
+
+	obs_output_update(output, settings);
+
+	// start janus output
+	obs_frontend_start_janus_stream();
+
+	return RequestResult::Success();
+}
+
+RequestResult RequestHandler::StopJanusOutput(const Request &request)
+{
+	// stop janus output
+	obs_frontend_stop_janus_stream();
+
+	return RequestResult::Success();
+}
+
+RequestResult RequestHandler::GetJanusOutputStatus(const Request &)
+{
+	RequestStatus::RequestStatus statusCode;
+	std::string comment;
+	OBSOutputAutoRelease output = obs_get_output_by_name("janus_output");
+	if (!output)
+		return RequestResult::Error(statusCode, comment);
+
+	json responseData;
+	responseData["janusActive"] = obs_frontend_janus_stream_active();
+	return RequestResult::Success(responseData);
+}

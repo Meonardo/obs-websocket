@@ -24,7 +24,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include "RequestHandler.h"
 
 const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_handlerMap{
-	// Lost
+	// Lost + Extra
 	{"SetRecordDirectory", &RequestHandler::SetRecordDirectory},
 	{"GetFilenameFormatting", &RequestHandler::GetFilenameFormatting},
 	{"SetFilenameFormatting", &RequestHandler::SetFilenameFormatting},
@@ -35,6 +35,9 @@ const std::unordered_map<std::string, RequestMethodHandler> RequestHandler::_han
 	{"ToggleAudioMixer", &RequestHandler::ToggleAudioMixer},
 	{"ToggleMainWindowHide", &RequestHandler::ToggleMainWindowHide},
 	{"SaveProject", &RequestHandler::SaveProject},
+	{"StartJanusOutput", &RequestHandler::StartJanusOutput},
+	{"StopJanusOutput", &RequestHandler::StopJanusOutput},
+	{"GetJanusOutputStatus", &RequestHandler::GetJanusOutputStatus},
 	{"ToggleInteractionMode", &RequestHandler::ToggleInteractionMode},
 	
 	// General
